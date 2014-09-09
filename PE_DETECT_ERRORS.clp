@@ -31,8 +31,9 @@
 
 (defrule DETECT_ERROR-PLAN_STATUS_WITHOUT_ACTIVE_PLAN ; By design of the planning engine, this should never happen!
 	(declare (salience 10000))
-	(plan_status (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps))
-	(not (active_plan (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps)))
+	?p <-(plan (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps))
+	(plan_status ?p)
+	(not (active_plan ?p))
 	=>
 	(printout t "ERROR: PLAN STATUS W/O ACTIVE PLAN!" crlf
 		tab tab "Task: " ?taskName crlf
