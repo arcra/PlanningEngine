@@ -9,7 +9,7 @@
 	?ps <-(plan_status ?p)
 	?ap <-(active_plan ?p)
 	(not
-		?p <-(plan)
+		(fact-existp ?p)
 	)
 	=>
 	(retract ?ps ?ap)
@@ -41,9 +41,12 @@
 	?p <-(plan (task ?taskName) (step ?step $?steps) (params $?params) (action_type ?action_type))
 	(not
 		(and
-			?p2 <-(plan (task ?taskName) (step ? $?steps))
+			(plan (task ?taskName) (step ? $?steps) (params $?params2) (action_type ?action_type2))
 			(test
-				(neq ?p ?p2)
+				(or
+					(neq $?params $?params2)
+					(neq ?action_type ?action_type2)
+				)
 			)
 		)
 	)
@@ -65,9 +68,10 @@
 	?p <-(plan (task ?taskName) (step ?step) (action_type ?action_type) (params $?params))
 	(not
 		(and
-			(plan (task ?taskName) (step ?))
+			(plan (task ?taskName) (step ?) (action_type ?action_type2) (params $?params2))
 			(test
-				(neq ?p ?p2)
+				(neq ?action_type ?action_type2)
+				(neq $?params $?params2)
 			)
 		)
 	)
@@ -117,9 +121,10 @@
 	?p <-(plan (task ?taskName) (step ?step ?next_step $?steps) (params $?params) (action_type ?action_type))
 	(not
 		(and
-			?p2 <-(plan (task ?taskName) (step ? ?next_step $?steps))
+			(plan (task ?taskName) (step ? ?next_step $?steps) (params $?params2) (action_type ?action_type2))
 			(test
-				(neq ?p ?p2)
+				(neq ?action_type ?action_type2)
+				(neq $?params $?params2)
 			)
 		)
 	)
@@ -135,9 +140,10 @@
 	?p <-(plan (task ?taskName) (step ?step) (params $?params) (action_type ?action_type))
 	(not
 		(and
-			?p2 <-(plan (task ?taskName) (step ?))
+			(plan (task ?taskName) (step ?) (params $?params2) (action_type ?action_type2))
 			(test
-				(neq ?p ?p2)
+				(neq ?action_type ?action_type2)
+				(neq $?params $?params2)
 			)
 		)
 	)

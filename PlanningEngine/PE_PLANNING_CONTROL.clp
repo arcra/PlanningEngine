@@ -16,7 +16,8 @@
 ; - A plan fact can have an enabled_plan fact or an active_plan fact, but
 ;	not both.
 ; - Only the most detailed plans (so far) (i. e. leaf nodes)
-;	are either enabled or active.
+;	are either enabled or active. (i. e. parent plans cannot be enabled,
+;	and thus, cannot be discarded when activating plans)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -28,13 +29,17 @@
 
 	?ape <-(PE-allPlansEnabled)
 	?p <-(plan (task ?taskName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
-	(not (enabled_plan ?p))
+	(not (PE-enabled_plan ?p))
 	(not (active_plan ?p))
 	(not
 		(and
-			?p2 <-(plan (task ?taskName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
+			(plan (task ?taskName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
 			(test
-				(neq ?p ?p2)
+				(or
+					(neq ?action_type ?action_type2)
+					(neq $?params1 $?params2)
+					(neq (create$ ?step1 $?steps1) (create$ ?step2 $?steps2))
+				)
 			)
 			(test
 				(or
@@ -67,7 +72,7 @@
 (defrule retract_enabled
 	; Executes after running al plan_outcome handling rules, before starting re-planning
 ;	(declare (salience 10000)) ; I think salience should not be necessary
-	?ep <-(enabled_plan ?)
+	?ep <-(PE-enabled_plan ?)
 	(not (PE-allPlansEnabled))
 	(not (PE-ready_to_plan))
 	(not (plan_status ? ?))
@@ -77,7 +82,7 @@
 
 (defrule set_ready_to_plan
 ;	(declare (salience 10000))
-	(not (enabled_plan ?))
+	(not (PE-enabled_plan ?))
 	(not (active_plan ?))
 	(not (PE-allPlansEnabled))
 	(not (PE-ready_to_plan))
@@ -87,6 +92,23 @@
 	)
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;	ENABLE PLANS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -95,13 +117,17 @@
 	(not (PE-allPlansEnabled))
 	(PE-ready_to_plan)
 	(not (plan_status ? ?)) ; So plan_status can propagate before enabling new plans.
-	?p <-(plan (task ?taskName) (action_type ?action_type) (step ?step1 $?steps1) (params $?params))
-	(not (enabled_plan ?p))
+	?p <-(plan (task ?taskName) (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
+	(not (PE-enabled_plan ?p))
 	(not
 		(and
-			?p2 <-(plan (task ?taskName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
+			(plan (task ?taskName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
 			(test
-				(neq ?p ?p2)
+				(or
+					(neq ?action_type ?action_type2)
+					(neq $?params1 $?params2)
+					(neq (create$ ?step1 $?steps1) (create$ ?step2 $?steps2))
+				)
 			)
 			(test
 				(or
@@ -118,7 +144,7 @@
 	)
 	=>
 	(assert
-		(enabled_plan ?p)
+		(PE-enabled_plan ?p)
 	)
 )
 
@@ -127,11 +153,15 @@
 ;	?rtp <-(ready_to_plan)
 	?p <-(plan (task ?taskName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	(or
-		(enabled_plan ?p)
+		(PE-enabled_plan ?p)
 		(and
-			?p2 <-(plan (task ?taskName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
+			(plan (task ?taskName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
 			(test
-				(neq ?p ?p2)
+				(or
+					(neq ?action_type ?action_type2)
+					(neq $?params1 $?params2)
+					(neq (create$ ?step1 $?steps1) (create$ ?step2 $?steps2))
+				)
 			)
 			(test
 				(or
@@ -154,6 +184,23 @@
 	)
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;	CREATE PLAN TREE FACTS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -171,7 +218,7 @@
 (defrule set_plan_children
 	(declare (salience 10000))
 	(active_plan ?p)
-	?p <-(plan (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps))
+	?p <-(plan (task ?taskName) (step $?steps))
 	?pch <-(PE-plan_children ?p $?children)
 	?cp <-(plan (task ?taskName) (step ?step $?steps))
 	(not
@@ -193,47 +240,38 @@
 	(declare (salience 10000))
 	?pch <-(PE-plan_children ?p $?)
 	(not
-		?p <-(plan (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps))
+		(fact-existp ?p)
 	)
 	=>
 	(retract ?pch)
 )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;	ACTIVATE PLANS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defrule set_plan_active-no_other_enabled_plans
-	(PE-allPlansEnabled)
-	(PE-ready_to_plan)
-	?p <-(plan (task ?taskName1) (action_type ?action_type1) (params $?params1) (step $?steps1))
-	?ep <-(enabled_plan ?p)
-	(not
-		(and
-			?p2 <-(plan (task ?taskName2) (action_type ?action_type2) (params $?params2) (step $?steps2))
-			(enabled_plan ?p2)
-			(test
-				(neq ?p ?p2)
-			)
-		)
-	)
-	(not (active_plan ?))
-	?d <-(PE-discarded)
-	=>
-	(retract ?ep ?d)
-	(assert
-		(active_plan ?p)
-	)
-)
 
 (defrule set_plan_active-search_top_priority_plan-start_comparing_plans
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-top_priority_plan ?))
 	(not (PE-comparing $?))
-	?ep1<-(enabled_plan ?p1)
-	?p1 <-(plan (task ?taskName1) (action_type ?action_type1) (params $?params1) (step $?steps1))
-	?ep2<-(enabled_plan ?p2)
-	?p2 <-(plan (task ?taskName2) (action_type ?action_type2) (params $?params2) (step $?steps2))
+	?ep1<-(PE-enabled_plan ?p1)
+	?ep2<-(PE-enabled_plan ?p2)
 	(test
 		(neq ?p1 ?p2)
 	)
@@ -304,20 +342,61 @@
 	(test
 		(= ?priority2 ?priority1)
 	)
-	?p1 <-(plan (task ?taskName1) (step ?step1 $?steps1))
-	?pp1 <-(plan (task ?taskName1) (step $?steps1))
-	(PE-plan_children ?pp1 $? ?p1 $?)
-	(PE-discarded $?discarded)
-	(test
-		(not
-			(member$ ?pp1 $?discarded)
-		)
-	)
+	(PE-plan_children ?pp1 $? ?p1 $?) ; Notice there should only be one parent plan for each plan
 	=>
 	(retract ?cmp)
 	(assert
 		(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 		(PE-upgraded_first ?p1)
+	)
+)
+
+(defrule set_plan_active-search_top_priority_plan-comparing_not_upgraded-draw-no_parent-second_parent
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not (PE-top_priority_plan ?))
+	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
+	(not (PE-upgraded_first ?))
+	(not (PE-upgraded_second ?))
+	(plan_priority (fact-slot-value ?p1 action_type) ?priority1)
+	(plan_priority (fact-slot-value ?p2 action_type) ?priority2)
+	(test
+		(= ?priority2 ?priority1)
+	)
+	(not
+		(PE-plan_children ? $? ?p1 $?)
+	)
+	(PE-plan_children ?pp2 $? ?p2 $?)
+	=>
+	(retract ?cmp)
+	(assert
+		(PE-comparing ?ep1 ?p1 ?ep2 ?pp2)
+	)
+)
+
+(defrule set_plan_active-search_top_priority_plan-comparing_not_upgraded-draw-no_parents
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not (PE-top_priority_plan ?))
+	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
+	(not (PE-upgraded_first ?))
+	(not (PE-upgraded_second ?))
+	(plan_priority (fact-slot-value ?p1 action_type) ?priority1)
+	(plan_priority (fact-slot-value ?p2 action_type) ?priority2)
+	(test
+		(= ?priority2 ?priority1)
+	)
+	(not
+		(PE-plan_children ? $? ?p1 $?)
+	)
+	(not
+		(PE-plan_children ? $? ?p2 $?)
+	)
+	?d <-(PE-discarded $?discarded)
+	=>
+	(retract ?cmp ?d)
+	(assert
+		(PE-discarded $?discarded ?ep2)
 	)
 )
 
@@ -373,20 +452,64 @@
 	(test
 		(= ?priority2 ?priority1)
 	)
-	?p2 <-(plan (task ?taskName2) (step ?step2 $?steps2))
-	?pp2 <-(plan (task ?taskName2) (step $?steps2))
 	(PE-plan_children ?pp2 $? ?p2 $?)
-	(PE-discarded $?discarded)
-	(test
-		(not
-			(member$ ?pp2 $?discarded)
-		)
-	)
 	=>
 	(retract ?cmp)
 	(assert
 		(PE-comparing ?ep1 ?p1 ?ep2 ?pp2)
 		(PE-upgraded_second ?pp1)
+	)
+)
+
+(defrule set_plan_active-search_top_priority_plan-comparing_upgraded_first-draw-no_second_parent-first_parent
+
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not (PE-top_priority_plan ?))
+	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
+	?uf <-(PE-upgraded_first ?)
+	(not (PE-upgraded_second ?))
+	(plan_priority (fact-slot-value ?pp1 action_type) ?priority1)
+	(plan_priority (fact-slot-value ?p2 action_type) ?priority2)
+	(test
+		(= ?priority2 ?priority1)
+	)
+	(not
+		(PE-plan_children ?pp2 $? ?p2 $?)
+	)
+	(PE-plan_children ?pp3 $? ?pp1 $?)
+	=>
+	(retract ?cmp ?uf)
+	(assert
+		(PE-comparing ?ep1 ?pp3 ?ep2 ?pp2)
+		(PE-upgraded_first ?pp1)
+	)
+)
+
+(defrule set_plan_active-search_top_priority_plan-comparing_upgraded_first-draw-no_parents
+
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not (PE-top_priority_plan ?))
+	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
+	?uf <-(PE-upgraded_first ?)
+	(not (PE-upgraded_second ?))
+	(plan_priority (fact-slot-value ?pp1 action_type) ?priority1)
+	(plan_priority (fact-slot-value ?p2 action_type) ?priority2)
+	(test
+		(= ?priority2 ?priority1)
+	)
+	(not
+		(PE-plan_children ?pp2 $? ?p2 $?)
+	)
+	(not
+		(PE-plan_children ?pp3 $? ?pp1 $?)
+	)
+	?d <-(PE-discarded $?discarded)
+	=>
+	(retract ?cmp ?uf ?d)
+	(assert
+		(PE-discarded $?discarded ?ep2)
 	)
 )
 
@@ -446,5 +569,31 @@
 	(retract ?cmp ?uf ?us)
 	(assert
 		(PE-comparing ?ep1 ?pp1 ?ep2 ?pp2)
+	)
+)
+
+(defrule set_plan_active-search_top_priority_plan-set_top_priority_plan
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	?ep <-(PE-enabled_plan ?p)
+	?d <-(PE-discarded $?discarded)
+	(not
+		(and
+			(PE-enabled_plan ?p2)
+			(test
+				(neq ?p ?p2)
+			)
+			(test
+				(not
+					(member$ ?p2 $?discarded)
+				)
+			)
+		)
+	)
+;	(not (active_plan ?))
+	=>
+	(retract ?ep ?d)
+	(assert
+		(PE-top_priority_plan ?p)
 	)
 )
