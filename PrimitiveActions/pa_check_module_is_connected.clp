@@ -4,10 +4,10 @@
 	(not
 		(plan_status ?p ?)
 	)
-	(not (waiting (symbol (sym-cat check_module_is_connected_ ?module))))
-	(not (BB_answer "connected" (sym-cat check_module_is_connected_ ?module) 1 ?))
+	(not (waiting (symbol =(sym-cat check_module_is_connected_ ?module))))
+	(not (BB_answer "connected" =(sym-cat check_module_is_connected_ ?module) 1 ?))
 	=>
-	(send-command "connected" (sym-cat check_module_is_connected_ ?module) ?module)
+	(send-command "connected" =(sym-cat check_module_is_connected_ ?module) ?module)
 )
 
 (defrule check_module_is_connected-does_NOT_respond
@@ -16,7 +16,7 @@
 	(not
 		(plan_status ?p ?)
 	)
-	(BB_answer "connected" (sym-cat check_module_is_connected_ ?module) 0 ?)
+	(BB_answer "connected" =(sym-cat check_module_is_connected_ ?module) 0 ?)
 	=>
 	(assert
 		(plan (task ?taskName) (action_type spg_say) (params "I found the error, the module: " ?module " is not running or is not working properly.") (step $?steps))
@@ -30,7 +30,7 @@
 	(not
 		(plan_status ?p ?)
 	)
-	(BB_answer "connected" (sym-cat check_module_is_connected_ ?module) 1 ?)
+	(BB_answer "connected" =(sym-cat check_module_is_connected_ ?module) 1 ?)
 	=>
 	(assert
 		(plan_status ?p failed)

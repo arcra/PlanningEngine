@@ -8,7 +8,7 @@
 
 
 (defrule DETECT_ERROR-CYCLED_PLAN ; This should be prevented before execution, but just in case.
-	(declare (salience 100000))
+	(declare (salience 10000))
 	(plan (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps) )
 	?p <-(plan (task ?taskName) (action_type ?action_type) (params $?params) 
 		(step $?steps2&:(and 
@@ -36,7 +36,7 @@
 )
 
 (defrule DETECT_ERROR-PLAN_STATUS_WITHOUT_ACTIVE_PLAN ; By design of the planning engine, this should never happen!
-	(declare (salience 100000))
+	(declare (salience 10000))
 	?p <-(plan (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps))
 	(plan_status ?p)
 	(not (active_plan ?p))
@@ -55,7 +55,7 @@
 )
 
 (defrule DETECT_ERROR-CYCLED_PRIORITIES
-	(declare (salience 100000))
+	(declare (salience 10000))
 	(plan_priority ?action_type1 ?priority1)
 	(plan_priority ?action_type2 ?priority2)
 	(plan_priority ?action_type3 ?priority3)
@@ -77,7 +77,7 @@
 )
 
 (defrule DETECT_ERROR-REPEATED_PRIORITIES
-	(declare (salience 100000))
+	(declare (salience 10000))
 	(plan_priority ?action_type ?priority1)
 	(plan_priority ?action_type ~?priority1)
 	=>
