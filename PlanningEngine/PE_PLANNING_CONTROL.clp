@@ -18,6 +18,7 @@
 ; - Only the most detailed plans (so far) (i. e. leaf nodes)
 ;	are either enabled or active. (i. e. parent plans cannot be enabled,
 ;	and thus, cannot be discarded when activating plans)
+; - There should only be one parent plan for each plan
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -60,7 +61,6 @@
 
 (defrule retract_active
 	; Executes after running al plan_outcome handling rules, before starting re-planning
-;	(declare (salience 10000)) ; I think salience should not be necessary
 	?ap <-(active_plan ?)
 	(not (PE-allPlansEnabled))
 	(not (PE-ready_to_plan))
@@ -71,7 +71,6 @@
 
 (defrule retract_enabled
 	; Executes after running al plan_outcome handling rules, before starting re-planning
-;	(declare (salience 10000)) ; I think salience should not be necessary
 	?ep <-(PE-enabled_plan ?)
 	(not (PE-allPlansEnabled))
 	(not (PE-ready_to_plan))
@@ -81,7 +80,6 @@
 )
 
 (defrule set_ready_to_plan
-;	(declare (salience 10000))
 	(not (PE-enabled_plan ?))
 	(not (active_plan ?))
 	(not (PE-allPlansEnabled))
@@ -113,7 +111,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule EnableMostDetailedPlansFromTasks
-;	(declare (salience -10000)) ; So plan_status can propagate before enabling new plans.
 	(not (PE-allPlansEnabled))
 	(PE-ready_to_plan)
 	(not (plan_status ? ?)) ; So plan_status can propagate before enabling new plans.
@@ -268,7 +265,7 @@
 (defrule set_plan_active-search_top_priority_plan-start_comparing_plans
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	(not (PE-comparing $?))
 	?ep1<-(PE-enabled_plan ?p1)
 	?ep2<-(PE-enabled_plan ?p2)
@@ -290,10 +287,85 @@
 	)
 )
 
+(defrule set_plan_active-search_top_priority_plan-no_priority_first-no_parent
+	(declare (salience 10001))
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_plan ?))
+	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
+	(not
+		(plan_priority (fact-slot-value ?p1 action_type) ?)
+	)
+	(not
+		(PE-plan_children ? $? ?p1 $?)
+	)
+	?d <-(PE-discarded $?discarded)
+	=>
+	(retract ?cmp ?d)
+	(assert
+		(PE-discarded $?discarded ?ep1)
+	)
+)
+
+(defrule set_plan_active-search_top_priority_plan-no_priority_second-no_parent
+	(declare (salience 10001))
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_plan ?))
+	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
+	(plan_priority (fact-slot-value ?p1 action_type) ?)
+	(not
+		(plan_priority (fact-slot-value ?p2 action_type) ?)
+	)
+	(not
+		(PE-plan_children ? $? ?p2 $?)
+	)
+	?d <-(PE-discarded $?discarded)
+	=>
+	(retract ?cmp ?d)
+	(assert
+		(PE-discarded $?discarded ?ep2)
+	)
+)
+
+(defrule set_plan_active-search_top_priority_plan-no_priority_first
+	(declare (salience 10000))
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_plan ?))
+	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
+	(not
+		(plan_priority (fact-slot-value ?p1 action_type) ?)
+	)
+	(PE-plan_children ?pp1 $? ?p1 $?) ; Notice there should only be one parent plan for each plan
+	=>
+	(retract ?cmp)
+	(assert
+		(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
+	)
+)
+
+(defrule set_plan_active-search_top_priority_plan-no_priority_second
+	(declare (salience 10000))
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_plan ?))
+	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
+	(not
+		(plan_priority (fact-slot-value ?p2 action_type) ?)
+	)
+	(PE-plan_children ?pp2 $? ?p2 $?)
+	=>
+	(retract ?cmp)
+	(assert
+		(PE-comparing ?ep1 ?p1 ?ep2 ?pp2)
+	)
+)
+
 (defrule set_plan_active-search_top_priority_plan-comparing_not_upgraded-wins_first
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not (PE-upgraded_first ?))
 	(not (PE-upgraded_second ?))
@@ -313,7 +385,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_not_upgraded-wins_second
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not (PE-upgraded_first ?))
 	(not (PE-upgraded_second ?))
@@ -333,7 +405,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_not_upgraded-draw
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not (PE-upgraded_first ?))
 	(not (PE-upgraded_second ?))
@@ -342,7 +414,7 @@
 	(test
 		(= ?priority2 ?priority1)
 	)
-	(PE-plan_children ?pp1 $? ?p1 $?) ; Notice there should only be one parent plan for each plan
+	(PE-plan_children ?pp1 $? ?p1 $?)
 	=>
 	(retract ?cmp)
 	(assert
@@ -354,7 +426,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_not_upgraded-draw-no_parent-second_parent
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not (PE-upgraded_first ?))
 	(not (PE-upgraded_second ?))
@@ -377,7 +449,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_not_upgraded-draw-no_parents
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not (PE-upgraded_first ?))
 	(not (PE-upgraded_second ?))
@@ -403,7 +475,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_upgraded_first-wins_first
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 	?uf <-(PE-upgraded_first ?)
 	(not (PE-upgraded_second ?))
@@ -423,7 +495,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_upgraded_first-wins_second
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 	?uf <-(PE-upgraded_first ?)
 	(not (PE-upgraded_second ?))
@@ -443,7 +515,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_upgraded_first-draw
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 	(PE-upgraded_first ?p1)
 	(not (PE-upgraded_second ?))
@@ -465,7 +537,7 @@
 
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 	?uf <-(PE-upgraded_first ?)
 	(not (PE-upgraded_second ?))
@@ -490,7 +562,7 @@
 
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 	?uf <-(PE-upgraded_first ?)
 	(not (PE-upgraded_second ?))
@@ -516,7 +588,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_upgraded_second-wins_first
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?pp2)
 	?uf <-(PE-upgraded_first ?p1)
 	?us <-(PE-upgraded_second ?pp1)
@@ -536,7 +608,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_upgraded_second-wins_second
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?pp2)
 	?uf <-(PE-upgraded_first ?p1)
 	?us <-(PE-upgraded_second ?pp1)
@@ -556,7 +628,7 @@
 (defrule set_plan_active-search_top_priority_plan-comparing_upgraded_second-draw
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
-	(not (PE-top_priority_plan ?))
+	(not (PE-activable_plan ?))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?pp2)
 	?uf <-(PE-upgraded_first ?p1)
 	?us <-(PE-upgraded_second ?pp1)
@@ -575,25 +647,99 @@
 (defrule set_plan_active-search_top_priority_plan-set_top_priority_plan
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
+	(not
+		(PE-activable_plan ?)
+	)
 	?ep <-(PE-enabled_plan ?p)
 	?d <-(PE-discarded $?discarded)
 	(not
 		(and
 			(PE-enabled_plan ?p2)
 			(test
-				(neq ?p ?p2)
-			)
-			(test
-				(not
-					(member$ ?p2 $?discarded)
+				(and
+					(neq ?p ?p2)
+					(not
+						(member$ ?p2 $?discarded)
+					)
 				)
 			)
 		)
 	)
-;	(not (active_plan ?))
 	=>
 	(retract ?ep ?d)
 	(assert
-		(PE-top_priority_plan ?p)
+		(PE-activable_plan ?p)
+		(PE-activable_plans ?p)
+	)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule set_plan_active-search_parallel_plans-discard_plan
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	?ep <-(PE-enabled_plan ?p)
+	(PE-activable_plan ?ap)
+	(not
+		(or
+			(can_run_in_parallel (fact-slot-value ?p action_type) (fact-slot-value ?ap action_type))
+			(can_run_in_parallel (fact-slot-value ?ap action_type) (fact-slot-value ?p action_type))
+		)
+	)
+	=>
+	(retract ?ep)
+)
+
+(defrule set_plan_active-search_parallel_plans-add_plan
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	?ep <-(PE-enabled_plan ?p)
+	(exists (PE-activable_plan ?))
+	(not
+		(and
+			(PE-activable_plan ?ap)
+			(not
+				(or
+					(can_run_in_parallel (fact-slot-value ?p action_type) (fact-slot-value ?ap action_type))
+					(can_run_in_parallel (fact-slot-value ?ap action_type) (fact-slot-value ?p action_type))
+				)
+			)
+		)
+	)
+	?aps <-(PE-activable_plans $?plans)
+	=>
+	(retract ?aps ?ep)
+	(assert
+		(PE-activable_plan ?p)
+		(PE-activable_plans $?plans ?p)
+	)
+)
+
+(defrule set_plan_active-search_parallel_plans-delete_activable_plan
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not
+		(PE-enabled_plan ?)
+	)
+	?ap <-(PE-activable_plan ?)
+	=>
+	(retract ?ap)
+)
+
+(defrule set_plan_active-search_parallel_plans-delete_activable_plans
+	(PE-allPlansEnabled)
+	(PE-ready_to_plan)
+	(not
+		(PE-activable_plan ?)
+	)
+	?aps <-(PE-activable_plans $?plans)
+	=>
+	(retract ?aps)
+	(progn$ (?ap $?plans)
+		(assert (active_plan ?ap))
 	)
 )

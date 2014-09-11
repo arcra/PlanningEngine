@@ -1,0 +1,3 @@
+plan_test_plan.clp
+../EnterArena/plan_enter_arena.lst
+../../PrimitiveActions/pa_spg_say.lst

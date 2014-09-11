@@ -1,11 +1,2 @@
 ../../PlanningEngine/bootloader.lst
-plan_test_plan.clp
-../EnterArena/plan_enter_arena.clp
-../CheckFailure/plan_check_failure.clp
-../../PrimitiveActions/pa_arms_goto.clp
-../../PrimitiveActions/pa_check_location_exists.clp
-../../PrimitiveActions/pa_check_module_is_connected.clp
-../../PrimitiveActions/pa_getclose_location.clp
-../../PrimitiveActions/pa_spg_say.clp
-../../PrimitiveActions/pa_wait_door.clp
-../../PrimitiveActions/pa_wait_user_set_location.clp
+bl_plan_test_plan.lst
