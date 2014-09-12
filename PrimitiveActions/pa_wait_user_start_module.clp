@@ -51,7 +51,7 @@
 ; SPEECH RULES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule wait_user_start_module-send_speech
-	?p <-(plan (task ?taskName) (action_type wait_user_start_module) (params ?module) (step $?steps))
+	?p <-(plan (task ?taskName) (action_type wait_user_start_module) (params ?module) (step $?steps) (parent ?pp))
 	(active_plan ?p)
 	(not
 		(plan_status ?p ?)
@@ -59,7 +59,7 @@
 	(not (speech_notification_sent wait_user_start_module))
 	=>
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "Please start the module: " ?module ", so I can continue with the execution.") (step $?steps))
+		(plan (task ?taskName) (action_type spg_say) (params "Please start the module: " ?module ", so I can continue with the execution.") (step $?steps) (parent ?pp))
 
 		(speech_notification_sent wait_user_start_module)
 	)

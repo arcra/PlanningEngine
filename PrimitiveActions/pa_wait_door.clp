@@ -40,7 +40,7 @@
 )
 
 (defrule wait_door-door_open
-	?p <-(plan (task ?taskName) (step $?steps) (action_type wait_door) (params "door"))
+	?p <-(plan (task ?taskName) (step $?steps) (action_type wait_door) (params "door") (parent ?pp))
 	(active_plan ?p)
 	(not
 		(plan_status ?p ?)
@@ -51,7 +51,7 @@
 	(retract ?sp)
 	(assert
 		(plan (task ?taskName) (action_type spg_say) (params "I can see now that the door is open.")
-			(step $?steps) )
+			(step $?steps) (parent ?pp))
 		
 		(plan_status ?p successful)
 	)
@@ -62,7 +62,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule wait_door-start_speech
-	?p <-(plan (task ?taskName) (action_type wait_door) (params "door") (step ?step $?steps))
+	?p <-(plan (task ?taskName) (action_type wait_door) (params "door") (step ?step $?steps) (parent ?pp))
 	(active_plan ?p)
 	(not
 		(plan_status ?p ?)
@@ -71,7 +71,7 @@
 	(not (speech_notification_sent wait_door) )
 	=>
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "I'm waiting for the door to be opened.") (step (- ?step 1) $?steps) )
+		(plan (task ?taskName) (action_type spg_say) (params "I'm waiting for the door to be opened.") (step (- ?step 1) $?steps) (parent ?pp))
 		(speech_notification_sent wait_door)
 	)
 	(setTimer 10000 wait_door_speech)
@@ -89,7 +89,7 @@
 ;)
 
 (defrule wait_door-speechtimer_timedout_before_door_is_open
-	?p <-(plan (task ?taskName) (action_type wait_door) (params "door") (step ?step $?steps))
+	?p <-(plan (task ?taskName) (action_type wait_door) (params "door") (step ?step $?steps) (parent ?pp))
 	(active_plan ?p)
 	(not
 		(plan_status ?p ?)
@@ -98,6 +98,6 @@
 	(BB_timer wait_door_speech)
 	=>
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "I'm still waiting for the door to be opened.") (step (- ?step 1) $?steps) )
+		(plan (task ?taskName) (action_type spg_say) (params "I'm still waiting for the door to be opened.") (step (- ?step 1) $?steps) (parent ?pp))
 	)
 )

@@ -22,11 +22,11 @@
 	(assert
 		(plan (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps2))
 	)
-	(log-message ERROR "CYCLED PLAN!" "\n"
-		"\t\tTask: " ?taskName "\n"
-		"\t\tAction type: " ?action_type "\n"
-		"\t\tParams" $?params "\n"
-	)
+;	(log-message ERROR "CYCLED PLAN!" crlf
+;		tab tab "Task: " ?taskName crlf
+;		tab tab "Action type: " ?action_type crlf
+;		tab tab "Params" $?params crlf
+;	)
 	(printout t "ERROR: CYCLED PLAN!" crlf
 		tab tab "Task: " ?taskName crlf
 		tab tab "Action type: " ?action_type crlf
@@ -41,11 +41,11 @@
 	(plan_status ?p)
 	(not (active_plan ?p))
 	=>
-	(log-message ERROR "PLAN STATUS W/O ACTIVE PLAN!" "\n"
-		"\t\tTask: " ?taskName "\n"
-		"\t\tAction type: " ?action_type "\n"
-		"\t\tParams" $?params "\n"
-	)
+;	(log-message ERROR "PLAN STATUS W/O ACTIVE PLAN!" "\n"
+;		"\t\tTask: " ?taskName "\n"
+;		"\t\tAction type: " ?action_type "\n"
+;		"\t\tParams" $?params "\n"
+;	)
 	(printout t "ERROR: PLAN STATUS W/O ACTIVE PLAN!" crlf
 		tab tab "Task: " ?taskName crlf
 		tab tab "Action type: " ?action_type crlf
@@ -67,9 +67,9 @@
 		)
 	)
 	=>
-	(log-message ERROR "CYCLED PRIORITIES!" "\n"
-		"\t\tAction types: " ?action_type1 " - " ?action_type2 " - " ?action_type3 "\n"
-	)
+;	(log-message ERROR "CYCLED PRIORITIES!" "\n"
+;		"\t\tAction types: " ?action_type1 " - " ?action_type2 " - " ?action_type3 "\n"
+;	)
 	(printout t "ERROR: CYCLED PRIORITIES!" crlf
 		tab tab "Action types: " ?action_type1 " - " ?action_type2 " - " ?action_type3 crlf
 	)
@@ -81,9 +81,9 @@
 	(plan_priority ?action_type ?priority1)
 	(plan_priority ?action_type ~?priority1)
 	=>
-	(log-message ERROR "REPEATED PRIORITIES!" "\n"
-		"\t\tAction type: " ?action_type "\n"
-	)
+;	(log-message ERROR "REPEATED PRIORITIES!" "\n"
+;		"\t\tAction type: " ?action_type "\n"
+;	)
 	(printout t "ERROR: REPEATED PRIORITIES!" crlf
 		tab tab "Action type: " ?action_type crlf
 	)

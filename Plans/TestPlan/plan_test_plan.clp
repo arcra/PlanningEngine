@@ -7,8 +7,8 @@
 	=>
 	(assert
 		(plan (task ?taskName) (action_type spg_say) (params "I'm going to execute the task:" ?taskName)
-			(step 1 $?steps) )
+			(step 1 $?steps) (parent ?p) )
 		(plan (task ?taskName) (action_type enter_arena) (params ?entrance_location)
-			(step 2 $?steps) )
+			(step 2 $?steps) (parent ?p) )
 	)
 )

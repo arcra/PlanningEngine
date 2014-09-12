@@ -7,9 +7,14 @@
         (type SYMBOL)
         (default ?NONE)
     )
-    (multislot params)
+    (multislot params
+        (default "")
+    )
     (multislot step
         (type INTEGER)
-        (default ?NONE)
+        (default 0)
+    )
+    (slot parent
+        (default nil)
     )
 )

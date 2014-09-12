@@ -16,7 +16,7 @@
 )
 
 (defrule getclose_location-timeout_before_answer_or_failed
-	?p <-(plan (task ?taskName) (action_type getclose_location) (params ?location) (step ?step $?steps))
+	?p <-(plan (task ?taskName) (action_type getclose_location) (params ?location) (step ?step $?steps) (parent ?pp))
 	(active_plan ?p)
 	(not
 		(plan_status ?p ?)
@@ -27,13 +27,13 @@
 	=>
 	(retract ?m ?sp)
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "It seems I couldn't manage to get there, I will check for problems and try again.") (step (- ?step 2) $?steps) )
-		(plan (task ?taskName) (action_type check_getclose_location) (step (- ?step 1) $?steps) (params ?location))
+		(plan (task ?taskName) (action_type spg_say) (params "It seems I couldn't manage to get there, I will check for problems and try again.") (step (- ?step 2) $?steps) (parent ?pp) )
+		(plan (task ?taskName) (action_type check_getclose_location) (step (- ?step 1) $?steps) (params ?location) (parent ?pp))
 	)
 )
 
 (defrule getclose_location-succeeded
-	?p <-(plan (task ?taskName) (step $?steps) (action_type getclose_location) (params ?location))
+	?p <-(plan (task ?taskName) (step $?steps) (action_type getclose_location) (params ?location) (parent ?pp))
 	(active_plan ?p)
 	(not
 		(plan_status ?p ?)
@@ -44,7 +44,7 @@
 	=>
 	(retract ?m ?sp)
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "I arrived to the" ?location) (step $?steps) )
+		(plan (task ?taskName) (action_type spg_say) (params "I arrived to the" ?location) (step $?steps) (parent ?pp) )
 		(plan_status ?p successful)
 	)
 )
@@ -53,7 +53,7 @@
 ;			SPEECH NOTIFICATIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule getclose_location-start_speech
-	?p <-(plan (task ?taskName) (action_type getclose_location) (params ?location) (step ?step $?steps))
+	?p <-(plan (task ?taskName) (action_type getclose_location) (params ?location) (step ?step $?steps) (parent ?pp))
 	(active_plan ?p)
 	(not
 		(plan_status ?p ?)
@@ -62,7 +62,7 @@
 	(not (speech_notification_sent getclose_location) )
 	=>
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "I'm going to the" ?location) (step (- ?step 1) $?steps) )
+		(plan (task ?taskName) (action_type spg_say) (params "I'm going to the" ?location) (step (- ?step 1) $?steps) (parent ?pp) )
 		(speech_notification_sent getclose_location)
 	)
 )

@@ -11,7 +11,7 @@
 )
 
 (defrule check_location_exists-does_NOT_exist
-	?p <-(plan (task ?taskName) (action_type check_location_exists) (params ?location) (step ?step $?steps) )
+	?p <-(plan (task ?taskName) (action_type check_location_exists) (params ?location) (step $?steps) (parent ?pp) )
 	(active_plan ?p)
 	(not
 		(plan_status ?p ?)
@@ -19,7 +19,7 @@
 	(BB_answer "mp_position" check_location_exists 0 ?)
 	=>
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "I found the error, I do not know the location" ?location) (step ?step $?steps))
+		(plan (task ?taskName) (action_type spg_say) (params "I found the error, I do not know the location" ?location) (step $?steps) (parent ?pp))
 		(plan_status ?p successful)
 	)
 )

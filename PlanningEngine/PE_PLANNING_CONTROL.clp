@@ -81,139 +81,12 @@
 	(retract ?ep)
 )
 
-(defrule set_ready_to_delete_plan_children_facts
+(defrule set_ready_to_plan
 	(not (PE-enabled_plan ?))
 	(not (active_plan ?))
 	(not (PE-allPlansEnabled))
-	(not (PE-ready_to_delete_plan_tree))
 	(not (PE-ready_to_plan))
 	=>
-	(assert
-		(PE-ready_to_delete_plan_tree)
-;		(PE-ready_to_plan)
-	)
-)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;	CREATE PLAN TREE FACTS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defrule create_plan_children
-	(declare (salience 9800))
-	?p <-(plan (task ?taskName) (action_type ?action_type) (params $?params) (step $?steps))
-	(active_plan ?p)
-	(not (PE-plan_children ?p $?))
-	=>
-	(assert
-		(PE-plan_children ?p)
-		(PE-current_parent ?p)
-	)
-)
-
-(defrule set_plan_children
-	(declare (salience 9800))
-	?pch <-(PE-plan_children ?pp $?children)
-	(PE-current_parent ?pp)
-	(not
-		(active_plan ?pp)
-	)
-	?cp <-(plan (task ?taskName) (step ?step ?next_step $?steps))
-	(test
-		(neq ?cp ?pp)
-	)
-	(not
-		(and
-			(PE-plan_children ? $?children2)
-			(test
-				(member$ ?cp $?children2)
-			)
-		)
-	)
-	=>
-	(retract ?pch)
-	(assert
-		(PE-plan_children ?pp $?children ?cp)
-	)
-)
-
-(defrule disable_plan_children
-	(declare (salience 9500))
-	(PE-plan_children ?pp $?)
-	?current <-(PE-current_parent ?pp)
-	(not
-		(active_plan ?pp)
-	)
-	=>
-	(retract ?current)
-)
-
-(defrule create_plan_children_do_not_delete_flags
-	(declare (salience 9800))
-;	?pch <-(PE-plan_children ?p&:(not (fact-existp ?p)) $? )
-	(PE-ready_to_delete_plan_tree)
-	?pp <-(plan)
-	(PE-plan_children ?pp $?)
-	=>
-	(assert (PE-do_not_delete_plan ?pp))
-)
-
-(defrule delete_plan_children_facts
-	(declare (salience 9500))
-	(PE-ready_to_delete_plan_tree)
-	?pch <-(PE-plan_children ?pp $?)
-	(not
-		(PE-do_not_delete_plan ?pp)
-	)
-	=>
-	(retract ?pch)
-)
-
-(defrule stop_deleting_plan_children_facts
-	(declare (salience 9500))
-	?rdpt <-(PE-ready_to_delete_plan_tree)
-	(not
-		(and
-			(PE-plan_children ?pp $?)
-			(not
-				(PE-do_not_delete_plan ?pp)
-			)
-		)
-	)
-	=>
-	(retract ?rdpt)
-	(assert (PE-done_deleting_plan_tree))
-)
-
-(defrule delete_flags
-	(declare (salience 9500))
-	(PE-done_deleting_plan_tree)
-	?flag <-(PE-do_not_delete_plan ?)
-	=>
-	(retract ?flag)
-)
-
-(defrule set_ready_to_plan
-	(declare (salience 9500))
-	?ddpt <-(PE-done_deleting_plan_tree)
-	(not (PE-do_not_delete_plan ?))
-	=>
-	(retract ?ddpt)
 	(assert
 		(PE-ready_to_plan)
 	)
@@ -335,12 +208,10 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?p1 <-(plan (parent nil))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not
 		(plan_priority =(fact-slot-value ?p1 action_type) ?)
-	)
-	(not
-		(PE-plan_children ? $? ?p1 $?)
 	)
 	?d <-(PE-discarded $?discarded)
 	=>
@@ -355,13 +226,11 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?p2 <-(plan (parent nil))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(plan_priority =(fact-slot-value ?p1 action_type) ?)
 	(not
 		(plan_priority =(fact-slot-value ?p2 action_type) ?)
-	)
-	(not
-		(PE-plan_children ? $? ?p2 $?)
 	)
 	?d <-(PE-discarded $?discarded)
 	=>
@@ -376,11 +245,11 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?p1 <-(plan (parent ?pp1))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not
 		(plan_priority =(fact-slot-value ?p1 action_type) ?)
 	)
-	(PE-plan_children ?pp1 $? ?p1 $?) ; Notice there should only be one parent plan for each plan
 	=>
 	(retract ?cmp)
 	(assert
@@ -393,11 +262,11 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?p2 <-(plan (parent ?pp2))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not
 		(plan_priority =(fact-slot-value ?p2 action_type) ?)
 	)
-	(PE-plan_children ?pp2 $? ?p2 $?)
 	=>
 	(retract ?cmp)
 	(assert
@@ -449,6 +318,7 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?p1 <-(plan (parent ?pp1))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not (PE-upgraded_first ?))
 	(not (PE-upgraded_second ?))
@@ -457,7 +327,6 @@
 	(test
 		(= ?priority2 ?priority1)
 	)
-	(PE-plan_children ?pp1 $? ?p1 $?)
 	=>
 	(retract ?cmp)
 	(assert
@@ -470,6 +339,8 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?p1 <-(plan (parent nil))
+	?p2 <-(plan (parent ?pp2))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not (PE-upgraded_first ?))
 	(not (PE-upgraded_second ?))
@@ -478,10 +349,6 @@
 	(test
 		(= ?priority2 ?priority1)
 	)
-	(not
-		(PE-plan_children ? $? ?p1 $?)
-	)
-	(PE-plan_children ?pp2 $? ?p2 $?)
 	=>
 	(retract ?cmp)
 	(assert
@@ -493,6 +360,8 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?p1 <-(plan (parent nil))
+	?p2 <-(plan (parent nil))
 	?cmp <-(PE-comparing ?ep1 ?p1 ?ep2 ?p2)
 	(not (PE-upgraded_first ?))
 	(not (PE-upgraded_second ?))
@@ -500,12 +369,6 @@
 	(plan_priority =(fact-slot-value ?p2 action_type) ?priority2)
 	(test
 		(= ?priority2 ?priority1)
-	)
-	(not
-		(PE-plan_children ? $? ?p1 $?)
-	)
-	(not
-		(PE-plan_children ? $? ?p2 $?)
 	)
 	?d <-(PE-discarded $?discarded)
 	=>
@@ -559,6 +422,7 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?p2 <-(plan (parent ?pp2))
 	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 	(PE-upgraded_first ?p1)
 	(not (PE-upgraded_second ?))
@@ -567,7 +431,6 @@
 	(test
 		(= ?priority2 ?priority1)
 	)
-	(PE-plan_children ?pp2 $? ?p2 $?)
 	=>
 	(retract ?cmp)
 	(assert
@@ -581,6 +444,8 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?pp1 <-(plan (parent ?pp3))
+	?p2 <-(plan (parent nil))
 	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 	?uf <-(PE-upgraded_first ?)
 	(not (PE-upgraded_second ?))
@@ -589,10 +454,6 @@
 	(test
 		(= ?priority2 ?priority1)
 	)
-	(not
-		(PE-plan_children ? $? ?p2 $?)
-	)
-	(PE-plan_children ?pp3 $? ?pp1 $?)
 	=>
 	(retract ?cmp ?uf)
 	(assert
@@ -606,6 +467,8 @@
 	(PE-allPlansEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_plan ?))
+	?pp1 <-(plan (parent nil))
+	?p2 <-(plan (parent nil))
 	?cmp <-(PE-comparing ?ep1 ?pp1 ?ep2 ?p2)
 	?uf <-(PE-upgraded_first ?)
 	(not (PE-upgraded_second ?))
@@ -613,12 +476,6 @@
 	(plan_priority =(fact-slot-value ?p2 action_type) ?priority2)
 	(test
 		(= ?priority2 ?priority1)
-	)
-	(not
-		(PE-plan_children ?pp2 $? ?p2 $?)
-	)
-	(not
-		(PE-plan_children ?pp3 $? ?pp1 $?)
 	)
 	?d <-(PE-discarded $?discarded)
 	=>
