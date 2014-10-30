@@ -1,14 +1,15 @@
 (defrule test_plan-plan
-	?p <-(plan (task ?taskName) (action_type test_plan) (params ?entrance_location) (step $?steps))
-	(active_plan ?p)
+	?t <-(task (plan ?planName) (action_type test_plan) (params ?entrance_location) (step $?steps))
+	(active_task ?t)
 	(not 
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	=>
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "I'm going to execute the task:" ?taskName)
-			(step 1 $?steps) (parent ?p) )
-		(plan (task ?taskName) (action_type enter_arena) (params ?entrance_location)
-			(step 2 $?steps) (parent ?p) )
+		(task (plan ?planName) (action_type spg_say) (params "I'm going to execute the plan:" ?planName)
+			(step 1 $?steps) (parent ?t) )
+		(task (plan ?planName) (action_type enter_arena) (params ?entrance_location)
+			(step 2 $?steps) (parent ?t) )
 	)
 )

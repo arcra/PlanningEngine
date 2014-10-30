@@ -1,9 +1,10 @@
 (defrule check_location_exists-send_command
-	?p <-(plan (action_type check_location_exists) (params ?location))
-	(active_plan ?p)
+	?t <-(task (action_type check_location_exists) (params ?location))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(not (waiting (symbol check_location_exists)))
 	(not (BB_answer "mp_position" check_location_exists 1 ?))
 	=>
@@ -11,36 +12,38 @@
 )
 
 (defrule check_location_exists-does_NOT_exist
-	?p <-(plan (task ?taskName) (action_type check_location_exists) (params ?location) (step $?steps) (parent ?pp) )
-	(active_plan ?p)
+	?t <-(task (plan ?planName) (action_type check_location_exists) (params ?location) (step $?steps) (parent ?pt) )
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(BB_answer "mp_position" check_location_exists 0 ?)
 	=>
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "I found the error, I do not know the location" ?location) (step $?steps) (parent ?pp))
-		(plan_status ?p successful)
+		(task (plan ?planName) (action_type spg_say) (params "I found the error, I do not know the location" ?location) (step $?steps) (parent ?pt))
+		(task_status ?t successful)
 	)
 )
 
 (defrule check_location_exists-exists
-	?p <-(plan (action_type check_location_exists))
-	(active_plan ?p)
+	?t <-(task (action_type check_location_exists))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(BB_answer "mp_position" check_location_exists 1 ?)
 	=>
 	(assert
-		(plan_status ?p failed)
+		(task_status ?t failed)
 	)
 )
 
 (defrule check_location_exists-finished
-	?p <-(plan (action_type check_location_exists))
-	(active_plan ?p)
-	(plan_status ?p ?)
+	?t <-(task (action_type check_location_exists))
+	(active_task ?t)
+	(task_status ?t ?)
 	=>
 	(assert
 		(checked_location_exists)

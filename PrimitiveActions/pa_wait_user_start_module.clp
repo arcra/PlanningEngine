@@ -1,9 +1,10 @@
 (defrule wait_user_start_module-start_timer
-	?p <-(plan (action_type wait_user_start_module))
-	(active_plan ?p)
+	?t <-(task (action_type wait_user_start_module))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(not (waiting (symbol wait_user_start_module)))
 	(not (BB_answer "connected" wait_user_start_module ? ?))
 	(not (timer_sent wait_user_start_module $?))
@@ -13,37 +14,40 @@
 )
 
 (defrule wait_user_start_module-timedout_or_failed
-	?p <-(plan (action_type wait_user_start_module))
-	(active_plan ?p)
+	?t <-(task (action_type wait_user_start_module))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(BB_answer "connected" wait_user_start_module 0 ?)
 	=>
 	(setTimer 4000 wait_user_start_module)
 )
 
 (defrule wait_user_start_module-timer_alarm
-	?p <-(plan (action_type wait_user_start_module) (params ?module))
-	(active_plan ?p)
+	?t <-(task (action_type wait_user_start_module) (params ?module))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(BB_timer wait_user_start_module)
 	=>
 	(send-command "connected" wait_user_start_module ?module)
 )
 
 (defrule wait_user_start_module-succeeded
-	?p <-(plan (action_type wait_user_start_module))
-	(active_plan ?p)
+	?t <-(task (action_type wait_user_start_module))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(BB_answer "connected" wait_user_start_module 1 ?)
 	=>
 	(assert
-		(plan_status ?p succeeded)
+		(task_status ?t succeeded)
 	)
 )
 
@@ -51,15 +55,16 @@
 ; SPEECH RULES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule wait_user_start_module-send_speech
-	?p <-(plan (task ?taskName) (action_type wait_user_start_module) (params ?module) (step $?steps) (parent ?pp))
-	(active_plan ?p)
+	?t <-(task (plan ?planName) (action_type wait_user_start_module) (params ?module) (step $?steps) (parent ?pt))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(not (speech_notification_sent wait_user_start_module))
 	=>
 	(assert
-		(plan (task ?taskName) (action_type spg_say) (params "Please start the module: " ?module ", so I can continue with the execution.") (step $?steps) (parent ?pp))
+		(task (plan ?planName) (action_type spg_say) (params "Please start the module: " ?module ", so I can continue with the execution.") (step $?steps) (parent ?pt))
 
 		(speech_notification_sent wait_user_start_module)
 	)
@@ -67,11 +72,12 @@
 )
 
 (defrule wait_user_start_module-send_speech_again
-	?p <-(plan (action_type wait_user_start_module))
-	(active_plan ?p)
+	?t <-(task (action_type wait_user_start_module))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	?sn <-(speech_notification_sent wait_user_start_module)
 	(BB_timer wait_user_start_module_speech)
 	=>
@@ -82,9 +88,9 @@
 ; FINISHED RULES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule wait_user_start_module-succeeded
-	?p <-(plan (action_type wait_user_start_module))
-	(active_plan ?p)
-	(plan_status ?p ?)
+	?t <-(task (action_type wait_user_start_module))
+	(active_task ?t)
+	(task_status ?t ?)
 	?sn <-(speech_notification_sent wait_user_start_module)
 	=>
 	(retract ?sn)

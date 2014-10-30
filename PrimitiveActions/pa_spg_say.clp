@@ -10,11 +10,12 @@
 )
 
 (defrule spg_say-send_command
-	?p <-(plan (action_type spg_say) (params $?speech))
-	(active_plan ?p)
+	?t <-(task (action_type spg_say) (params $?speech))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(not (waiting (symbol spg_say)))
 	(not (BB_answer "spg_say" spg_say 1 ?))
 	=>
@@ -22,14 +23,15 @@
 )
 
 (defrule spg_say-command_succeeded
-	?p <-(plan (action_type spg_say))
-	(active_plan ?p)
+	?t <-(task (action_type spg_say))
+	(active_task ?t)
 	(not
-		(plan_status ?p ?)
+		(task_status ?t ?)
 	)
+	(not (cancel_active_tasks))
 	(BB_answer "spg_say" spg_say 1 ?)
 	=>
 	(assert
-		(plan_status ?p successful)
+		(task_status ?t successful)
 	)
 )

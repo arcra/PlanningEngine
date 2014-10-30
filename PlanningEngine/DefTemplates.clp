@@ -1,5 +1,5 @@
-(deftemplate plan
-    (slot task
+(deftemplate task
+    (slot plan
         (type LEXEME)
         (default ?NONE)
     )
@@ -17,4 +17,8 @@
     (slot parent
         (default nil)
     )
+)
+
+(deffacts PE-init_facts
+    (PE-last_plan nil)
 )
