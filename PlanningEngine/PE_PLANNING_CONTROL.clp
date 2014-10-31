@@ -51,8 +51,8 @@
 					)
 				)
 			)
-			(not (can_run_in_parallel ?action_type1 ?action_type2))
-			(not (can_run_in_parallel ?action_type2 ?action_type1))
+;			(not (can_run_in_parallel ?action_type1 ?action_type2))
+;			(not (can_run_in_parallel ?action_type2 ?action_type1))
 		)
 	)
 	; There's no other task from a different plan that should have been activated before this one. (i. e. this one should have been activated.)
@@ -129,7 +129,6 @@
 (defrule EnableMostDetailedTasksFromPlans
 	(not (PE-allTasksEnabled))
 	(PE-ready_to_plan)
-;	(not (task_status ? ?)) ; So task_status can propagate before enabling new tasks.
 	?t <-(task (plan ?planName) (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
 	(not (PE-enabled_task ?t))
 	(not
@@ -151,8 +150,8 @@
 					)
 				)
 			)
-			(not (can_run_in_parallel ?action_type1 ?action_type2))
-			(not (can_run_in_parallel ?action_type2 ?action_type1))
+;			(not (can_run_in_parallel ?action_type1 ?action_type2))
+;			(not (can_run_in_parallel ?action_type2 ?action_type1))
 		)
 	)
 	=>
