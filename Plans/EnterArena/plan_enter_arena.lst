@@ -1,5 +1,5 @@
 plan_enter_arena.clp
 ;../../PrimitiveActions/pa_force_fail.lst
-../../PrimitiveActions/pa_wait_door.lst
+../../PrimitiveActions/pa_check_obstacle.lst
 ../../PrimitiveActions/pa_arms_goto.lst
 ../../PrimitiveActions/pa_getclose_location.lst
