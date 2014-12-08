@@ -110,7 +110,7 @@
 
 (defrule failed_task-mark_task_without_rules_as_failed-set_failure_task ; When a task has no rules (either to assert new sub-tasks or perform an action) it is either an incomplete design or (most likely) a task set to re-plan but with no more alternatives, which should be marked as failed.
 	(declare (salience -9500))
-	?t <-(task (plan ?planName) (step $?steps) (action_type ?action_type&~fail)) ; see next rule
+	?t <-(task (plan ?planName) (step $?steps) (action_type ?action_type&~PE-fail)) ; see next rule
 	(active_task ?t)
 	(not (waiting))
 	(not (timer_sent $?))
@@ -163,7 +163,7 @@
 	(log-message WARNING "Plan '" ?action_type "'' with steps: '" ?step " " $?steps "' failed. Deleted same hierarchy task for plan '" ?planName "' with action_type: '" ?action_type2 "' and params: '" $?params2 "'.")
 )
 
-(defrule failed_task-delete_failed_task ; After removing all other same-hierarchy tasks, remove this task and let the engine retask. (this rule applies to non-top-level tasks)
+(defrule failed_task-delete_failed_task ; After removing all other same-hierarchy tasks, remove this task and let the engine replan. (this rule applies to non-top-level tasks)
 	(declare (salience -9500))
 	?t <-(task (plan ?planName) (step ?step ?next_step $?steps) (params $?params) (action_type ?action_type))
 	?ts <-(task_status ?t failed)
@@ -201,5 +201,5 @@
 	=>
 	(retract ?ts ?at ?t)
 	(log-message ERROR "Top level task failed without alternative task!")
-	(send-command "spg_say" (str-cat "The task for the plan " ?planName " failed and I don't have an alternative task. I cannot accomplish the plan." 10000)
+	(send-command "spg_say" (str-cat "The task for the plan " ?planName " failed and I don't have an alternative plan. I cannot accomplish the task." 10000)
 )

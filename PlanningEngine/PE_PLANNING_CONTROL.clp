@@ -212,350 +212,414 @@
 	)
 	=>
 	(assert
-		(PE-comparing ?t1 ?t1 ?t2 ?t2)
+		(PE-comparing ?t1 nil ?t1 0 ?t2 nil ?t2 0)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-no_priority_first-no_parent
-	(declare (salience 9900))
+; FIRST REFERENCE
+;;;;;;;;;;;;;;;;;;
+(defrule set_task_active-search_top_priority_task-first_no_priority-no_parent-same_plan
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?t1 <-(task (parent nil))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
+	?cmp <-(PE-comparing ?t1 ? ?current1 ? ?t2 ? ? ?)
 	(not
-		(task_priority =(fact-slot-value ?t1 action_type) ?)
+		(task_priority =(fact-slot-value ?current1 action_type) ?)
 	)
+	(test (eq (fact-slot-value ?current1 parent) nil) )
+	(PE-last_plan ?planName)
+	(test (eq ?planName (fact-slot-value ?current1 plan) ) )
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?d)
+	(retract ?d ?cmp)
 	(assert
-		(PE-discarded $?discarded ?et1)
+		(PE-discarded $?discarded ?t2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-no_priority_second-no_parent
-	(declare (salience 9900))
+(defrule set_task_active-search_top_priority_task-first_no_priority-no_parent-different_plan
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?t2 <-(task (parent nil))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
-	(task_priority =(fact-slot-value ?t1 action_type) ?)
+	?cmp <-(PE-comparing ?t1 ? ?current1 ? ?t2 ? ? ?)
 	(not
-		(task_priority =(fact-slot-value ?t2 action_type) ?)
+		(task_priority =(fact-slot-value ?current1 action_type) ?)
 	)
+	(test (eq (fact-slot-value ?current1 parent) nil) )
+	(PE-last_plan ?planName)
+	(test (neq ?planName (fact-slot-value ?current1 plan) ) )
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?d)
+	(retract ?d ?cmp)
 	(assert
-		(PE-discarded $?discarded ?et2)
+		(PE-discarded $?discarded ?t1)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-no_priority_first
-	(declare (salience 9800))
+(defrule set_task_active-search_top_priority_task-first_no_priority-parent
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?t1 <-(task (parent ?pt1))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
 	(not
-		(task_priority =(fact-slot-value ?t1 action_type) ?)
+		(task_priority =(fact-slot-value ?current1 action_type) ?)
 	)
+	(test (neq (fact-slot-value ?current1 parent) nil) )
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?et1 ?pt1 ?et2 ?t2)
+		(PE-comparing ?t1 ?ref1 (fact-slot-value ?current1 parent) (+ ?d1 1) ?t2 ?ref2 ?current2 ?d2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-no_priority_second
-	(declare (salience 9800))
+(defrule set_task_active-search_top_priority_task-first_priority
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?t2 <-(task (parent ?pt2))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
+	?cmp <-(PE-comparing ?t1 nil ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	(task_priority =(fact-slot-value ?current1 action_type) ?)
+	=>
+	(retract ?cmp)
+	(assert
+		(PE-comparing ?t1 ?current1 ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	)
+)
+
+; SECOND REFERENCE
+;;;;;;;;;;;;;;;;;;
+
+(defrule set_task_active-search_top_priority_task-second_no_priority-no_parent-same_plan
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_task ?))
+	?cmp <-(PE-comparing ?t1 ? ? ? ?t2 ? ?current2 ?)
 	(not
-		(task_priority =(fact-slot-value ?t2 action_type) ?)
+		(task_priority =(fact-slot-value ?current2 action_type) ?)
 	)
+	(test (eq (fact-slot-value ?current2 parent) nil) )
+	(PE-last_plan ?planName)
+	(test (eq ?planName (fact-slot-value ?current2 plan) ) )
+	?d <-(PE-discarded $?discarded)
+	=>
+	(retract ?d ?cmp)
+	(assert
+		(PE-discarded $?discarded ?t1)
+	)
+)
+
+(defrule set_task_active-search_top_priority_task-second_no_priority-no_parent-different_plan
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_task ?))
+	?cmp <-(PE-comparing ?t1 ? ? ? ?t2 ? ?current2 ?)
+	(not
+		(task_priority =(fact-slot-value ?current2 action_type) ?)
+	)
+	(test (eq (fact-slot-value ?current2 parent) nil) )
+	(PE-last_plan ?planName)
+	(test (neq ?planName (fact-slot-value ?current2 plan) ) )
+	?d <-(PE-discarded $?discarded)
+	=>
+	(retract ?d ?cmp)
+	(assert
+		(PE-discarded $?discarded ?t2)
+	)
+)
+
+(defrule set_task_active-search_top_priority_task-second_no_priority-parent
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_task ?))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	(not
+		(task_priority =(fact-slot-value ?current2 action_type) ?)
+	)
+	(test (neq (fact-slot-value ?current2 parent) nil) )
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?et1 ?t1 ?et2 ?pt2)
+		(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 (fact-slot-value ?current2 parent) (+ ?d2 1))
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_not_upgraded-wins_first
+(defrule set_task_active-search_top_priority_task-second_priority
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
-	(not (PE-upgraded_first ?))
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?t1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(> ?priority1 ?priority2)
-	)
-	?d <-(PE-discarded $?discarded)
-	=>
-	(retract ?cmp ?d)
-	(assert
-		(PE-discarded $?discarded ?et2)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-comparing_not_upgraded-wins_second
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
-	(not (PE-upgraded_first ?))
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?t1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(> ?priority2 ?priority1)
-	)
-	?d <-(PE-discarded $?discarded)
-	=>
-	(retract ?cmp ?d)
-	(assert
-		(PE-discarded $?discarded ?et1)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-comparing_not_upgraded-draw
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?t1 <-(task (parent ?pt1))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
-	(not (PE-upgraded_first ?))
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?t1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(= ?priority2 ?priority1)
-	)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 nil ?current2 ?d2)
+	(task_priority =(fact-slot-value ?current2 action_type) ?)
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?et1 ?pt1 ?et2 ?t2)
-		(PE-upgraded_first ?t1)
+		(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?current2 ?current2 ?d2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_not_upgraded-draw-no_parent-second_parent
+; FIRST DIFFERENT
+;;;;;;;;;;;;;;;;;;
+
+(defrule set_task_active-search_top_priority_task-get_first_different-equal_priorities-no_parent-same_plan
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?t1 <-(task (parent nil))
-	?t2 <-(task (parent ?pt2))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
-	(not (PE-upgraded_first ?))
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?t1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(= ?priority2 ?priority1)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2&~nil ?current2 ?d2)
+	(not (PE-getting_second_different) )
+	(task_priority =(fact-slot-value ?current1 action_type) ?p1)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?p2)
+	(test (= ?p1 ?p2))
+	(test (eq (fact-slot-value ?current1 parent) nil) )
+	(PE-last_plan ?planName)
+	(test (eq ?planName (fact-slot-value ?current1 plan) ) )
+	?d <-(PE-discarded $?discarded)
+	=>
+	(retract ?d ?cmp)
+	(assert
+		(PE-discarded $?discarded ?t2)
 	)
+)
+
+(defrule set_task_active-search_top_priority_task-get_first_different-equal_priorities-no_parent-different_plan
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_task ?))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2&~nil ?current2 ?d2)
+	(not (PE-getting_second_different) )
+	(task_priority =(fact-slot-value ?current1 action_type) ?p1)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?p2)
+	(test (= ?p1 ?p2))
+	(test (eq (fact-slot-value ?current1 parent) nil) )
+	(PE-last_plan ?planName)
+	(test (neq ?planName (fact-slot-value ?current1 plan) ) )
+	?d <-(PE-discarded $?discarded)
+	=>
+	(retract ?d ?cmp)
+	(assert
+		(PE-discarded $?discarded ?t1)
+	)
+)
+
+(defrule set_task_active-search_top_priority_task-get_first_different-equal_priorities-parent
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_task ?))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2&~nil ?current2 ?d2)
+	(not (PE-getting_second_different) )
+	(task_priority =(fact-slot-value ?current1 action_type) ?p1)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?p2)
+	(test (= ?p1 ?p2))
+	(test (neq (fact-slot-value ?current1 parent) nil) )
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?et1 ?t1 ?et2 ?pt2)
+		(PE-comparing ?t1 ?ref1 (fact-slot-value ?current1 parent) (+ ?d1 1) ?t2 ?ref2 ?current2 ?d2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_not_upgraded-draw-no_parents
+(defrule set_task_active-search_top_priority_task-get_first_different-different_priorities
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?t1 <-(task (parent nil))
-	?t2 <-(task (parent nil))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?t2)
-	(not (PE-upgraded_first ?))
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?t1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(= ?priority2 ?priority1)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2&~nil ?current2 ?d2)
+	(not (PE-getting_second_different) )
+	(task_priority =(fact-slot-value ?current1 action_type) ?p1)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?p2)
+	(test (neq ?p1 ?p2))
+	=>
+	(assert
+		(PE-getting_second_different)
 	)
+)
+
+; SECOND DIFFERENT
+;;;;;;;;;;;;;;;;;;
+
+(defrule set_task_active-search_top_priority_task-get_second_different-equal_priorities-no_parent-same_plan
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_task ?))
+	?cmp <-(PE-comparing ?t1 ?ref1&~nil ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	(PE-getting_second_different)
+	(task_priority =(fact-slot-value ?ref1 action_type) ?p1)
+	(task_priority =(fact-slot-value ?current2 action_type) ?p2)
+	(test (= ?p1 ?p2))
+	(test (eq (fact-slot-value ?current2 parent) nil) )
+	(PE-last_plan ?planName)
+	(test (eq ?planName (fact-slot-value ?current2 plan) ) )
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?d)
+	(retract ?d ?cmp)
 	(assert
-		(PE-discarded $?discarded ?et2)
+		(PE-discarded $?discarded ?t1)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_upgraded_first-wins_first
+(defrule set_task_active-search_top_priority_task-get_second_different-equal_priorities-no_parent-different_plan
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?et1 ?pt1 ?et2 ?t2)
-	?uf <-(PE-upgraded_first ?)
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?pt1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(> ?priority1 ?priority2)
-	)
+	?cmp <-(PE-comparing ?t1 ?ref1&~nil ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	(PE-getting_second_different)
+	(task_priority =(fact-slot-value ?ref1 action_type) ?p1)
+	(task_priority =(fact-slot-value ?current2 action_type) ?p2)
+	(test (= ?p1 ?p2))
+	(test (eq (fact-slot-value ?current2 parent) nil) )
+	(PE-last_plan ?planName)
+	(test (neq ?planName (fact-slot-value ?current2 plan) ) )
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?d ?uf)
+	(retract ?d ?cmp)
 	(assert
-		(PE-discarded $?discarded ?et2)
+		(PE-discarded $?discarded ?t2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_upgraded_first-wins_second
+(defrule set_task_active-search_top_priority_task-get_second_different-equal_priorities-parent
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?et1 ?pt1 ?et2 ?t2)
-	?uf <-(PE-upgraded_first ?)
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?pt1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(> ?priority2 ?priority1)
-	)
-	?d <-(PE-discarded $?discarded)
-	=>
-	(retract ?cmp ?d ?uf)
-	(assert
-		(PE-discarded $?discarded ?et1)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-comparing_upgraded_first-draw
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?t2 <-(task (parent ?pt2))
-	?cmp <-(PE-comparing ?et1 ?pt1 ?et2 ?t2)
-	(PE-upgraded_first ?t1)
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?pt1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(= ?priority2 ?priority1)
-	)
+	?cmp <-(PE-comparing ?t1 ?ref1&~nil ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	(PE-getting_second_different)
+	(task_priority =(fact-slot-value ?ref1 action_type) ?p1)
+	(task_priority =(fact-slot-value ?current2 action_type) ?p2)
+	(test (= ?p1 ?p2))
+	(test (neq (fact-slot-value ?current2 parent) nil) )
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?et1 ?t1 ?et2 ?pt2)
-		(PE-upgraded_second ?pt1)
+		(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 (fact-slot-value ?current2 parent) (+ ?d2 1))
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_upgraded_first-draw-no_second_parent-first_parent
-
+; GET WINNER
+;;;;;;;;;;;;;;;;;;
+(defrule set_task_active-search_top_priority_task-get_winner-different_winner-different_distances-first_wins
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?pt1 <-(task (parent ?pt3))
-	?t2 <-(task (parent nil))
-	?cmp <-(PE-comparing ?et1 ?pt1 ?et2 ?t2)
-	?uf <-(PE-upgraded_first ?)
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?pt1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(= ?priority2 ?priority1)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	?gsd <-(PE-getting_second_different)
+	(task_priority =(fact-slot-value ?current1 action_type) ?pc1)
+	(task_priority =(fact-slot-value ?ref1 action_type) ?pr1)
+	(task_priority =(fact-slot-value ?current2 action_type) ?pc2)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?pr2)
+	(or
+		(and
+			(test (> ?pc1 ?pr2))
+			(test (< ?pr1 ?pc2))
+		)
+		(and
+			(test (< ?pc1 ?pr2))
+			(test (> ?pr1 ?pc2))
+		)
 	)
-	=>
-	(retract ?cmp ?uf)
-	(assert
-		(PE-comparing ?et1 ?pt3 ?et2 ?t2)
-		(PE-upgraded_first ?pt1)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-comparing_upgraded_first-draw-no_parents
-
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?pt1 <-(task (parent nil))
-	?t2 <-(task (parent nil))
-	?cmp <-(PE-comparing ?et1 ?pt1 ?et2 ?t2)
-	?uf <-(PE-upgraded_first ?)
-	(not (PE-upgraded_second ?))
-	(task_priority =(fact-slot-value ?pt1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?t2 action_type) ?priority2)
-	(test
-		(= ?priority2 ?priority1)
-	)
+	(test (< ?d1 ?d2))
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?uf ?d)
+	(retract ?cmp ?gsd ?d)
 	(assert
-		(PE-discarded $?discarded ?et2)
+		(PE-discarded $?discarded ?t2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_upgraded_second-wins_first
+(defrule set_task_active-search_top_priority_task-get_winner-different_winner-different_distances-second_wins
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?pt2)
-	?uf <-(PE-upgraded_first ?t1)
-	?us <-(PE-upgraded_second ?pt1)
-	(task_priority =(fact-slot-value ?t1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?pt2 action_type) ?priority2)
-	(test
-		(> ?priority1 ?priority2)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	?gsd <-(PE-getting_second_different)
+	(task_priority =(fact-slot-value ?current1 action_type) ?pc1)
+	(task_priority =(fact-slot-value ?ref1 action_type) ?pr1)
+	(task_priority =(fact-slot-value ?current2 action_type) ?pc2)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?pr2)
+	(or
+		(and
+			(test (> ?pc1 ?pr2))
+			(test (< ?pr1 ?pc2))
+		)
+		(and
+			(test (< ?pc1 ?pr2))
+			(test (> ?pr1 ?pc2))
+		)
 	)
+	(test (< ?d2 ?d1))
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?d ?uf ?us)
+	(retract ?cmp ?gsd ?d)
 	(assert
-		(PE-discarded $?discarded ?et2)
+		(PE-discarded $?discarded ?t1)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_upgraded_second-wins_second
+(defrule set_task_active-search_top_priority_task-get_winner-different_winner-same_distances
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?pt2)
-	?uf <-(PE-upgraded_first ?t1)
-	?us <-(PE-upgraded_second ?pt1)
-	(task_priority =(fact-slot-value ?t1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?pt2 action_type) ?priority2)
-	(test
-		(> ?priority2 ?priority1)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	?gsd <-(PE-getting_second_different)
+	(task_priority =(fact-slot-value ?current1 action_type) ?pc1)
+	(task_priority =(fact-slot-value ?ref1 action_type) ?pr1)
+	(task_priority =(fact-slot-value ?current2 action_type) ?pc2)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?pr2)
+	(or
+		(and
+			(test (> ?pc1 ?pr2))
+			(test (< ?pr1 ?pc2))
+		)
+		(and
+			(test (< ?pc1 ?pr2))
+			(test (> ?pr1 ?pc2))
+		)
 	)
+	(test (= ?d2 ?d1))
+	=>
+	(retract ?cmp ?gsd)
+	(assert
+		(PE-comparing ?t1 ?current1 ?current1 ?d1 ?t2 ?current2 ?current2 ?d2)
+	)
+)
+
+(defrule set_task_active-search_top_priority_task-get_winner-same_winner-first_wins
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not (PE-activable_task ?))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	?gsd <-(PE-getting_second_different)
+	(task_priority =(fact-slot-value ?current1 action_type) ?pc1)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?pr2)
+	(test (> ?pc1 ?pr2))
+	(task_priority =(fact-slot-value ?ref1 action_type) ?pr1)
+	(task_priority =(fact-slot-value ?current2 action_type) ?pc2)
+	(test (> ?pr1 ?pc2))
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?d ?uf ?us)
+	(retract ?cmp ?gsd ?d)
 	(assert
-		(PE-discarded $?discarded ?et1)
+		(PE-discarded $?discarded ?t2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-comparing_upgraded_second-draw
+(defrule set_task_active-search_top_priority_task-get_winner-same_winner-second_wins
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?et1 ?t1 ?et2 ?pt2)
-	?uf <-(PE-upgraded_first ?t1)
-	?us <-(PE-upgraded_second ?pt1)
-	(task_priority =(fact-slot-value ?t1 action_type) ?priority1)
-	(task_priority =(fact-slot-value ?pt2 action_type) ?priority2)
-	(test
-		(= ?priority2 ?priority1)
-	)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?d1 ?t2 ?ref2 ?current2 ?d2)
+	?gsd <-(PE-getting_second_different)
+	(task_priority =(fact-slot-value ?current1 action_type) ?pc1)
+	(task_priority =(fact-slot-value ?ref2 action_type) ?pr2)
+	(test (< ?pc1 ?pr2))
+	(task_priority =(fact-slot-value ?ref1 action_type) ?pr1)
+	(task_priority =(fact-slot-value ?current2 action_type) ?pc2)
+	(test (< ?pr1 ?pc2))
+	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?uf ?us)
+	(retract ?cmp ?gsd ?d)
 	(assert
-		(PE-comparing ?et1 ?pt1 ?et2 ?pt2)
+		(PE-discarded $?discarded ?t1)
 	)
 )
+
+; SET ACTIVE TASK
+;;;;;;;;;;;;;;;;;;
 
 (defrule set_task_active-search_top_priority_task-set_top_priority_task
 	(PE-allTasksEnabled)
@@ -565,6 +629,7 @@
 	)
 	?et <-(PE-enabled_task ?t)
 	?d <-(PE-discarded $?discarded)
+	; There's no other enabled task that is not discarded. (i. e. this is the only one activable.)
 	(not
 		(and
 			(PE-enabled_task ?t2)
