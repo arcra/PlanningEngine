@@ -2,55 +2,55 @@
 ;		COMMAND REQUESTS AND RESPONSES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defrule wait_door-door_unknown
-	?t <-(task (action_type wait_door) (params "door"))
+(defrule check_obstacle-door_unknown
+	?t <-(task (action_type check_obstacle) (params "door"))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
-	(not (BB_answer "mp_obstacle" wait_door ? ?))
-	(not (waiting (symbol wait_door)) )
-	(not (timer_sent wait_door_sleep ? ?))
+	(not (BB_answer "mp_obstacle" check_obstacle ? ?))
+	(not (waiting (symbol check_obstacle)) )
+	(not (timer_sent check_obstacle_sleep ? ?))
 	=>
-	(send-command "mp_obstacle" wait_door "door" 30000)
+	(send-command "mp_obstacle" check_obstacle "door" 30000)
 ) 
 
-(defrule wait_door-door_closed
-	?t <-(task (action_type wait_door) (params "door"))
+(defrule check_obstacle-door_closed
+	?t <-(task (action_type check_obstacle) (params "door"))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
-	?d <-(BB_answer "mp_obstacle" wait_door 1 ?)
+	?d <-(BB_answer "mp_obstacle" check_obstacle 1 ?)
 	=>
 	(retract ?d)
-	(setTimer 2000 wait_door_sleep)
+	(setTimer 2000 check_obstacle_sleep)
 )
 
-(defrule wait_door-check_again
-	?t <-(task (action_type wait_door) (params "door"))
+(defrule check_obstacle-check_again
+	?t <-(task (action_type check_obstacle) (params "door"))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
-	?time <-(BB_timer wait_door_sleep)
+	?time <-(BB_timer check_obstacle_sleep)
 	=>
 	(retract ?time)
-	(send-command "mp_obstacle" wait_door "door" 30000)	
+	(send-command "mp_obstacle" check_obstacle "door" 30000)	
 )
 
-(defrule wait_door-door_open
-	?t <-(task (plan ?planName) (step $?steps) (action_type wait_door) (params "door") (parent ?pt))
+(defrule check_obstacle-door_open
+	?t <-(task (plan ?planName) (step $?steps) (action_type check_obstacle) (params "door") (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
-	(BB_answer "mp_obstacle" wait_door 0 ?)
-	?sp <-(speech_notification_sent wait_door)
+	(BB_answer "mp_obstacle" check_obstacle 0 ?)
+	?sp <-(speech_notification_sent check_obstacle)
 	=>
 	(retract ?sp)
 	(assert
@@ -65,32 +65,32 @@
 ;			SPEECH NOTIFICATIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defrule wait_door-start_speech
-	?t <-(task (plan ?planName) (action_type wait_door) (params "door") (step ?step $?steps) (parent ?pt))
+(defrule check_obstacle-start_speech
+	?t <-(task (plan ?planName) (action_type check_obstacle) (params "door") (step ?step $?steps) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
-	(waiting (symbol wait_door))
-	(not (speech_notification_sent wait_door) )
+	(waiting (symbol check_obstacle))
+	(not (speech_notification_sent check_obstacle) )
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say) (params "I'm waiting for the door to be opened.") (step (- ?step 1) $?steps) (parent ?pt))
-		(speech_notification_sent wait_door)
+		(speech_notification_sent check_obstacle)
 	)
-	(setTimer 10000 wait_door_speech)
+	(setTimer 10000 check_obstacle_speech)
 )
 
-(defrule wait_door-speechtimer_timedout_before_door_is_open
-	?t <-(task (plan ?planName) (action_type wait_door) (params "door") (step ?step $?steps) (parent ?pt))
+(defrule check_obstacle-speechtimer_timedout_before_door_is_open
+	?t <-(task (plan ?planName) (action_type check_obstacle) (params "door") (step ?step $?steps) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
-	(not (BB_answer "mp_obstacle" wait_door 0 ?) )
-	(BB_timer wait_door_speech)
+	(not (BB_answer "mp_obstacle" check_obstacle 0 ?) )
+	(BB_timer check_obstacle_speech)
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say) (params "I'm still waiting for the door to be opened.") (step (- ?step 1) $?steps) (parent ?pt))
