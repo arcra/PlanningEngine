@@ -143,6 +143,7 @@
 (defrule failed_task-catch_failed_task ; When a task fails, a task to say that it failed and to later fail is asserted, this rule is to catch the failure so it won't create a loop and error.
 	?t <-(task (action_type PE-fail))
 	(active_task ?t)
+	(not (task_status ?t ?))
 	=>
 	(assert
 		(task_status ?t failed)
