@@ -4,16 +4,63 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; These couple of rules should not be necessary, and won't work with the current code.
+; They are included in case the CLIPS source is fixed and add robustness in
+; that case.
+
 (defrule delete_task_status
-	(declare (salience 9500))
+	(declare (salience 9800))
 	?ts <-(task_status ?t)
-	?at <-(active_task ?t)
 	(not
-		(fact-existp ?t)
+		(test (fact-existp ?t))
 	)
 	=>
-	(retract ?ts ?at)
-	(log-message INFO "Deleted task_status.")
+	(retract ?ts)
+	(log-message INFO "Deleted orphan task_status.")
+)
+
+(defrule delete_active
+	(declare (salience 9800))
+	?at <-(active_task ?t)
+	(not
+		(test (fact-existp ?t))
+	)
+	=>
+	(retract ?at)
+	(log-message INFO "Deleted orphan active_task.")
+)
+
+; DELETE CHILDREN PLANS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; When a task has a task_status (it either failed or was somehow already accomplished) its children should be deleted before processing the task_status.
+
+(defrule delete_task_children
+	(declare (salience 9800))
+	?t <-(task)
+	(task_status ?t ?)
+	?ct <-(task (parent ?t))
+	(not (PE-delete_child_task ?ct))
+	=>
+	(assert (PE-delete_child_task ?ct))
+)
+
+(defrule delete_task_children-recursively
+	(declare (salience 9800))
+	?t <-(task)
+	?ct <-(task (parent ?t))
+	(PE-delete_child_task ?t)
+	(not (PE-delete_child_task ?ct))
+	=>
+	(assert (PE-delete_child_task ?ct))
+)
+
+(defrule delete_task_child
+	(declare (salience 9800))
+	?t <-(task)
+	(not (task (parent ?t)))
+	?dct <-(PE-delete_child_task ?t)
+	=>
+	(retract ?dct ?t)
 )
 
 ; SUCCESSFUL PLANS
@@ -24,6 +71,7 @@
 	(declare (salience -9500))
 	?t <-(task (plan ?planName) (step ?step $?steps) (params $?params) (action_type ?action_type))
 	?ts <-(task_status ?t successful)
+	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	?t2 <-(task (plan ?planName) (step ? $?steps))
 	(test
@@ -39,6 +87,7 @@
 	?pt <-(task (params $?params_PP) (action_type ?action_type_PP))
 	?t <-(task (plan ?planName) (step ?step $?steps) (params $?params) (action_type ?action_type) (parent ?pt))
 	?ts <-(task_status ?t successful)
+	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	(not
 		(and
@@ -60,10 +109,11 @@
 	(log-message INFO "Successful task of plan '" ?planName "' with action_type: '" ?action_type "' and params: '" $?params "' was deleted with no other tasks of same hierarchy. Parent task with action_type: '" ?action_type_PP "' and params: '" $?params_PP "' is now active (and successful).")
 )
 
-(defrule successful_task-top_level_succeeded ; Top-level task was successful
+(defrule successful_task-top_level_succeeded ; LAST Top-level task for this plan was successful
 	(declare (salience -9500))
-	?t <-(task (plan ?planName) (step ?step) (action_type ?action_type) (params $?params))
+	?t <-(task (plan ?planName) (step ?step) (action_type ?action_type&~PE-success) (params $?params))
 	?ts <-(task_status ?t successful)
+	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	(not
 		(and
@@ -84,8 +134,9 @@
 	(task (plan ?planName) (action_type PE-success) (params "") (step (+ ?step 1)) (parent ?t))
 )
 
+; Salience should prevent the previous rule to catch this action_type, but for redundancy and a more elegant design, action_type is validated.
 (defrule successful_task-catch_successful_task ; When a top-level task succeeeds, a task to say that it succeeded and to later delete the plan is asserted, this rule is to catch the "success" plan so it won't create a loop and error.
-	?t <-(task (plan ?planName) (step ?step) (action_type PE-success))
+	?t <-(task (step ?) (action_type PE-success))
 	?at <-(active_task ?t)
 	=>
 	(retract ?at ?t)
@@ -115,12 +166,12 @@
 	(not (waiting))
 	(not (timer_sent $?))
 	(not (task_status ?t ?))
-	(not (PE-failed))
+	(not (PE-failed ?))
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say) (params "I don't know how to perform action:" ?action_type ".") (step 1 $?steps) (parent ?t))
 		(task (plan ?planName) (action_type PE-fail) (params "") (step 2 $?steps) (parent ?t))
-		(PE-failed)
+		(PE-failed ?t)
 	)
 )
 
@@ -131,7 +182,7 @@
 	(not (waiting))
 	(not (timer_sent $?))
 	(not (task_status ?t ?))
-	?failed <-(PE-failed)
+	?failed <-(PE-failed ?t)
 	=>
 	(retract ?failed)
 	(assert
@@ -153,8 +204,9 @@
 (defrule failed_task-delete_tasks_with_same_hierarchy ; Other tasks with same hierarchy (unordered or successors) must be cleared out.
 	(declare (salience -9500))
 	?t <-(task (plan ?planName) (step ?step $?steps) (params $?params) (action_type ?action_type))
-	(active_task ?t)
 	(task_status ?t failed)
+	(not (task (parent ?t)))
+	(active_task ?t)
 	?t2 <-(task (plan ?planName) (step ?step2 $?steps) (params $?params2) (action_type ?action_type2))
 	(test
 		(neq ?t ?t2)
@@ -168,6 +220,7 @@
 	(declare (salience -9500))
 	?t <-(task (plan ?planName) (step ?step ?next_step $?steps) (params $?params) (action_type ?action_type))
 	?ts <-(task_status ?t failed)
+	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	(not
 		(and
@@ -189,6 +242,7 @@
 	(declare (salience -9500))
 	?t <-(task (plan ?planName) (step ?step) (params $?params) (action_type ?action_type))
 	?ts <-(task_status ?t failed)
+	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	(not
 		(and
@@ -202,5 +256,5 @@
 	=>
 	(retract ?ts ?at ?t)
 	(log-message ERROR "Top level task failed without alternative task!")
-	(send-command "spg_say" (str-cat "The task for the plan " ?planName " failed and I don't have an alternative plan. I cannot accomplish the task." 10000)
+	(send-command "spg_say" top_level_task_failed (str-cat "The task for the plan " ?planName " failed and I don't have an alternative plan. I cannot accomplish the task.") 10000)
 )
