@@ -18,17 +18,22 @@
 ; - Only the most detailed tasks (so far) (i. e. leaf nodes)
 ;	are either enabled or active. (i. e. parent tasks cannot be enabled,
 ;	and thus, cannot be discarded when activating tasks)
+;
+; - task_priority is a number. When two tasks are compared and one of them
+;	does not have a task_priority, the other one will have prriority only
+;	if its priority number is greater than zero.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;	GET READY TO START PLANNING
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defrule NOT_allTasksEnabled
+(defrule NOT_allTasksEnabled-start_canceling
 	(declare (salience 9800))
 
 	?ate <-(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
+	(not (task_status ? ?))
 	?t <-(task (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	(not (active_task ?t))
 	; There's no other task of the same plan that should have been activated before this one. (i. e. this one should have been activated.)
@@ -81,6 +86,29 @@
 	)
 )
 
+(defrule NOT_allTasksEnabled-start_planning
+	(declare (salience 9700))
+
+	?ate <-(PE-allTasksEnabled)
+	(not (PE-ready_to_plan))
+	(not (task_status ? ?))
+	?t <-(task (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
+	(not (active_task ?t))
+	; There's no active task that cannot run in parallel with this one.
+	(not
+		(and
+			(active_task ?t2)
+			(not (can_run_in_parallel ?action_type1 =(fact-slot-value ?t2 action_type)))
+			(not (can_run_in_parallel =(fact-slot-value ?t2 action_type) ?action_type1))
+		)
+	)
+	=>
+	(retract ?ate)
+	(assert
+		(PE-ready_to_plan)
+	)
+)
+
 (defrule retract_active_tasks
 	(declare (salience -9800))
 	(cancel_active_tasks)
@@ -98,6 +126,7 @@
 
 (defrule set_ready_to_plan
 	(not (active_task ?))
+	(not (cancel_active_tasks))
 	(not (PE-allTasksEnabled))
 	(not (PE-ready_to_plan))
 	=>
@@ -632,13 +661,10 @@
 	; There's no other enabled task that is not discarded. (i. e. this is the only one activable.)
 	(not
 		(and
-			(PE-enabled_task ?t2)
+			(PE-enabled_task ?t2&~?t)
 			(test
-				(and
-					(neq ?t ?t2)
-					(not
-						(member$ ?t2 $?discarded)
-					)
+				(not
+					(member$ ?t2 $?discarded)
 				)
 			)
 		)
@@ -661,7 +687,7 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	?et <-(PE-enabled_task ?t)
-	(PE-activable_task ?at)
+	(PE-activable_task ?at) ; Enabled tasks for activable tasks were already deleted.
 	(not
 		(or
 			(can_run_in_parallel =(fact-slot-value ?t action_type) =(fact-slot-value ?at action_type))
