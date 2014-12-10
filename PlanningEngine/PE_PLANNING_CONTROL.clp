@@ -28,66 +28,69 @@
 ;	GET READY TO START PLANNING
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defrule NOT_allTasksEnabled-retract_higher_hierarchy_tasks
+	(declare (salience 9800))
+
+	(PE-allTasksEnabled)
+	(not (PE-ready_to_plan))
+	(not (task_status ? ?))
+	(task (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
+	?at <-(active_task ?t)
+	; There's another task of the same plan that should have been activated before this one.
+	(task (plan ?planName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
+	(test
+		(or
+			(neq ?action_type1 ?action_type2)
+			(neq $?params1 $?params2)
+			(neq (create$ ?step1 $?steps1) (create$ ?step2 $?steps2))
+		)
+	)
+	(test
+		(or
+			(> (length$ $?steps2) (length$ $?steps1))
+			(and
+				(eq $?steps2 $?steps1)
+				(< ?step2 ?step1)
+			)
+		)
+	)
+;	(not (can_run_in_parallel ?action_type1 ?action_type2))
+;	(not (can_run_in_parallel ?action_type2 ?action_type1))
+	=>
+	(retract ?at)
+)
+
 (defrule NOT_allTasksEnabled-start_canceling
 	(declare (salience 9800))
 
-	?ate <-(PE-allTasksEnabled)
+	(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
 	(not (task_status ? ?))
 	?t <-(task (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
-	(not (active_task ?t))
-	; There's no other task of the same plan that should have been activated before this one. (i. e. this one should have been activated.)
-	(not
+	(active_task ?t)
+	; There's another task from a different plan that should have been activated before this one.
+	(task (plan ~?planName) (action_type ?action_type2))
+	(not (can_run_in_parallel ?action_type1 ?action_type2))
+	(not (can_run_in_parallel ?action_type2 ?action_type1))
+	(task_priority ?action_type2 ?x)
+	(or
 		(and
-			(task (plan ?planName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
-			(test
-				(or
-					(neq ?action_type1 ?action_type2)
-					(neq $?params1 $?params2)
-					(neq (create$ ?step1 $?steps1) (create$ ?step2 $?steps2))
-				)
-			)
-			(test
-				(or
-					(> (length$ $?steps2) (length$ $?steps1))
-					(and
-						(eq $?steps2 $?steps1)
-						(< ?step2 ?step1)
-					)
-				)
-			)
-;			(not (can_run_in_parallel ?action_type1 ?action_type2))
-;			(not (can_run_in_parallel ?action_type2 ?action_type1))
+			(not (task_priority ?action_type1 ?))
+			(test (> ?x 0))
 		)
-	)
-	; There's no other task from a different plan that should have been activated before this one. (i. e. this one should have been activated.)
-	(not
 		(and
-			(task (plan ~?planName) (action_type ?action_type3))
-			(task_priority ?action_type3 ?x)
-			(or
-				(and
-					(not (task_priority ?action_type1 ?))
-					(test (> ?x 0))
-				)
-				(and
-					(task_priority ?action_type1 ?y)
-					(test (> ?x ?y))
-				)
-			)
-			(not (can_run_in_parallel ?action_type1 ?action_type3))
-			(not (can_run_in_parallel ?action_type3 ?action_type1))
+			(task_priority ?action_type1 ?y)
+			(test (> ?x ?y))
 		)
 	)
 	=>
-	(retract ?ate)
 	(assert
 		(cancel_active_tasks)
 	)
 )
 
 (defrule NOT_allTasksEnabled-start_planning
-	(declare (salience 9700))
+	(declare (salience 9500))
 
 	?ate <-(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
@@ -104,9 +107,6 @@
 	)
 	=>
 	(retract ?ate)
-	(assert
-		(PE-ready_to_plan)
-	)
 )
 
 (defrule retract_active_tasks
@@ -125,7 +125,7 @@
 )
 
 (defrule set_ready_to_plan
-	(not (active_task ?))
+;	(not (active_task ?))
 	(not (cancel_active_tasks))
 	(not (PE-allTasksEnabled))
 	(not (PE-ready_to_plan))
@@ -160,6 +160,7 @@
 	(PE-ready_to_plan)
 	?t <-(task (plan ?planName) (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
 	(not (PE-enabled_task ?t))
+	(not (active_task ?t))
 	(not
 		(and
 			(task (plan ?planName) (action_type ?action_type2) (params $?params2) (step ?step2 $?steps2))
