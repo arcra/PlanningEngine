@@ -61,7 +61,7 @@
 )
 
 (defrule NOT_allTasksEnabled-start_canceling
-	(declare (salience 9800))
+	(declare (salience 9700))
 
 	(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
