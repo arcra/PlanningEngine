@@ -1,5 +1,5 @@
 (defrule enter_arena-task
-	?t <-(task (plan ?planName) (action_type enter_arena) (params ?entrance_location) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type enter_arena) (params ?entrance_location) (step $?steps))
 	(active_task ?t)
 	(not 
 		(task_status ?t ?)

@@ -1,5 +1,5 @@
 (defrule wait_user_start_module-start_timer
-	?t <-(task (action_type wait_user_start_module))
+	(task (id ?t) (action_type wait_user_start_module))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -14,7 +14,7 @@
 )
 
 (defrule wait_user_start_module-timedout_or_failed
-	?t <-(task (action_type wait_user_start_module))
+	(task (id ?t) (action_type wait_user_start_module))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -26,7 +26,7 @@
 )
 
 (defrule wait_user_start_module-timer_alarm
-	?t <-(task (action_type wait_user_start_module) (params ?module))
+	(task (id ?t) (action_type wait_user_start_module) (params ?module))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -38,7 +38,7 @@
 )
 
 (defrule wait_user_start_module-succeeded
-	?t <-(task (action_type wait_user_start_module))
+	(task (id ?t) (action_type wait_user_start_module))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -55,7 +55,7 @@
 ; SPEECH RULES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule wait_user_start_module-send_speech
-	?t <-(task (plan ?planName) (action_type wait_user_start_module) (params ?module) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type wait_user_start_module) (params ?module) (step $?steps) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -72,7 +72,7 @@
 )
 
 (defrule wait_user_start_module-send_speech_again
-	?t <-(task (action_type wait_user_start_module))
+	(task (id ?t) (action_type wait_user_start_module))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -88,7 +88,7 @@
 ; FINISHED RULES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule wait_user_start_module-succeeded
-	?t <-(task (action_type wait_user_start_module))
+	(task (id ?t) (action_type wait_user_start_module))
 	(active_task ?t)
 	(task_status ?t ?)
 	?sn <-(speech_notification_sent wait_user_start_module)

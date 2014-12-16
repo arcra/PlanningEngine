@@ -1,5 +1,5 @@
 (defrule check_location_exists-send_command
-	?t <-(task (action_type check_location_exists) (params ?location))
+	(task (id ?t) (action_type check_location_exists) (params ?location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -12,7 +12,7 @@
 )
 
 (defrule check_location_exists-does_NOT_exist
-	?t <-(task (plan ?planName) (action_type check_location_exists) (params ?location) (step $?steps) (parent ?pt) )
+	(task (id ?t) (plan ?planName) (action_type check_location_exists) (params ?location) (step $?steps) (parent ?pt) )
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -27,7 +27,7 @@
 )
 
 (defrule check_location_exists-exists
-	?t <-(task (action_type check_location_exists))
+	(task (id ?t) (action_type check_location_exists))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -41,7 +41,7 @@
 )
 
 (defrule check_location_exists-finished
-	?t <-(task (action_type check_location_exists))
+	(task (id ?t) (action_type check_location_exists))
 	(active_task ?t)
 	(task_status ?t ?)
 	=>

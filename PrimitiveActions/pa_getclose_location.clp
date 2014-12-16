@@ -2,7 +2,7 @@
 ;		COMMAND REQUESTS AND RESPONSES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule getclose_location-not_moved
-	?t <-(task (action_type getclose_location) (params ?location))
+	(task (id ?t) (action_type getclose_location) (params ?location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -17,7 +17,7 @@
 )
 
 (defrule getclose_location-timeout_before_answer_or_failed
-	?t <-(task (plan ?planName) (action_type getclose_location) (params ?location) (step ?step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type getclose_location) (params ?location) (step ?step $?steps) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -35,7 +35,7 @@
 )
 
 (defrule getclose_location-succeeded
-	?t <-(task (plan ?planName) (step $?steps) (action_type getclose_location) (params ?location) (parent ?pt))
+	(task (id ?t) (plan ?planName) (step $?steps) (action_type getclose_location) (params ?location) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -56,7 +56,7 @@
 ;			SPEECH NOTIFICATIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule getclose_location-start_speech
-	?t <-(task (plan ?planName) (action_type getclose_location) (params ?location) (step ?step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type getclose_location) (params ?location) (step ?step $?steps) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -76,7 +76,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule getclose_location-cancel-start_cancel
-	?t <-(task (action_type getclose_location))
+	(task (id ?t) (action_type getclose_location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -89,7 +89,7 @@
 )
 
 (defrule getclose_location-cancel-successful_response
-	?t <-(task (action_type getclose_location))
+	(task (id ?t) (action_type getclose_location))
 	?at <-(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -101,7 +101,7 @@
 )
 
 (defrule getclose_location-cancel-failed_response
-	?t <-(task (action_type getclose_location))
+	(task (id ?t) (action_type getclose_location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)

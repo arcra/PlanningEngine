@@ -10,7 +10,7 @@
 )
 
 (defrule spg_say-send_command
-	?t <-(task (action_type spg_say) (params $?speech))
+	(task (id ?t) (action_type spg_say) (params $?speech))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -23,7 +23,7 @@
 )
 
 (defrule spg_say-command_succeeded
-	?t <-(task (action_type spg_say))
+	(task (id ?t) (action_type spg_say))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)

@@ -1,4 +1,7 @@
 (deftemplate task
+    (slot id
+        (default-dynamic (gensym*))
+    )
     (slot plan
         (type LEXEME)
         (default ?NONE)

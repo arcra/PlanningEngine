@@ -1,5 +1,5 @@
 (defrule arms_goto-send_command
-	?t <-(task (action_type arms_goto) (params ?position))
+	(task (id ?t) (action_type arms_goto) (params ?position))
 	(active_task ?t)
 	(not (task_status ?t ?) )
 	(not (cancel_active_tasks))
@@ -11,7 +11,7 @@
 )
 
 (defrule arms_goto-failed_or_timedout
-	?t <-(task (action_type arms_goto) (params ?position))
+	(task (id ?t) (action_type arms_goto) (params ?position))
 	(active_task ?t)
 	(not (task_status ?t ?) )
 	(not (cancel_active_tasks))
@@ -22,7 +22,7 @@
 )
 
 (defrule arms_goto-succeeded
-	?t <-(task (action_type arms_goto))
+	(task (id ?t) (action_type arms_goto))
 	(active_task ?t)
 	(not (task_status ?t ?) )
 	(not (cancel_active_tasks))

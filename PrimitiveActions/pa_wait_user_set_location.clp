@@ -1,5 +1,5 @@
 (defrule wait_user_set_location-start_timer
-	?t <-(task (action_type wait_user_set_location))
+	(task (id ?t) (action_type wait_user_set_location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -14,7 +14,7 @@
 )
 
 (defrule wait_user_set_location-timedout_or_failed
-	?t <-(task (action_type wait_user_set_location))
+	(task (id ?t) (action_type wait_user_set_location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -26,7 +26,7 @@
 )
 
 (defrule wait_user_set_location-timer_alarm
-	?t <-(task (action_type wait_user_set_location) (params ?location))
+	(task (id ?t) (action_type wait_user_set_location) (params ?location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -38,7 +38,7 @@
 )
 
 (defrule wait_user_set_location-succeeded
-	?t <-(task (action_type wait_user_set_location))
+	(task (id ?t) (action_type wait_user_set_location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -55,7 +55,7 @@
 ; SPEECH RULES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule wait_user_set_location-send_speech
-	?t <-(task (plan ?planName) (action_type wait_user_set_location) (params ?location) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type wait_user_set_location) (params ?location) (step $?steps) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -71,7 +71,7 @@
 )
 
 (defrule wait_user_set_location-send_speech_again
-	?t <-(task (action_type wait_user_set_location))
+	(task (id ?t) (action_type wait_user_set_location))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -87,7 +87,7 @@
 ; FINISHED RULES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule wait_user_set_location-succeeded
-	?t <-(task (action_type wait_user_set_location))
+	(task (id ?t) (action_type wait_user_set_location))
 	(active_task ?t)
 	(task_status ?t ?)
 	?sn <-(speech_notification_sent wait_user_set_location)

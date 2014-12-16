@@ -3,7 +3,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule check_obstacle-door_unknown
-	?t <-(task (action_type check_obstacle) (params "door"))
+	(task (id ?t) (action_type check_obstacle) (params "door"))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -17,7 +17,7 @@
 ) 
 
 (defrule check_obstacle-door_closed
-	?t <-(task (action_type check_obstacle) (params "door"))
+	(task (id ?t) (action_type check_obstacle) (params "door"))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -30,7 +30,7 @@
 )
 
 (defrule check_obstacle-check_again
-	?t <-(task (action_type check_obstacle) (params "door"))
+	(task (id ?t) (action_type check_obstacle) (params "door"))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -43,7 +43,7 @@
 )
 
 (defrule check_obstacle-door_open
-	?t <-(task (plan ?planName) (step $?steps) (action_type check_obstacle) (params "door") (parent ?pt))
+	(task (id ?t) (plan ?planName) (step $?steps) (action_type check_obstacle) (params "door") (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -66,7 +66,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule check_obstacle-start_speech
-	?t <-(task (plan ?planName) (action_type check_obstacle) (params "door") (step ?step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type check_obstacle) (params "door") (step ?step $?steps) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -83,7 +83,7 @@
 )
 
 (defrule check_obstacle-speechtimer_timedout_before_door_is_open
-	?t <-(task (plan ?planName) (action_type check_obstacle) (params "door") (step ?step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type check_obstacle) (params "door") (step ?step $?steps) (parent ?pt))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)

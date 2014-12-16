@@ -1,5 +1,5 @@
 (defrule check_module_is_connected-send_command
-	?t <-(task (action_type check_module_is_connected) (params ?module))
+	(task (id ?t) (action_type check_module_is_connected) (params ?module))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -12,7 +12,7 @@
 )
 
 (defrule check_module_is_connected-does_NOT_respond
-	?t <-(task (plan ?planName) (action_type check_module_is_connected) (params ?module) (step $?steps) )
+	(task (id ?t) (plan ?planName) (action_type check_module_is_connected) (params ?module) (step $?steps) )
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -27,7 +27,7 @@
 )
 
 (defrule check_module_is_connected-responds
-	?t <-(task (action_type check_module_is_connected) (params ?module))
+	(task (id ?t) (action_type check_module_is_connected) (params ?module))
 	(active_task ?t)
 	(not
 		(task_status ?t ?)
@@ -41,7 +41,7 @@
 )
 
 (defrule check_module_is_connected-finished
-	?t <-(task (action_type check_module_is_connected) (params ?module))
+	(task (id ?t) (action_type check_module_is_connected) (params ?module))
 	(active_task ?t)
 	(task_status ?t ?)
 	=>

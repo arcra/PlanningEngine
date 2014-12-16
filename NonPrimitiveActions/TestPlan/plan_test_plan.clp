@@ -1,5 +1,5 @@
 (defrule test_plan-plan
-	?t <-(task (plan ?planName) (action_type test_plan) (params ?entrance_location) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type test_plan) (params ?entrance_location) (step $?steps))
 	(active_task ?t)
 	(not 
 		(task_status ?t ?)
