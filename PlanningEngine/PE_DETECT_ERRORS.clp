@@ -54,27 +54,28 @@
 	(halt)
 )
 
-(defrule DETECT_ERROR-CYCLED_PRIORITIES
-	(declare (salience 10000))
-	(task_priority ?action_type1 ?priority1)
-	(task_priority ?action_type2 ?priority2)
-	(task_priority ?action_type3 ?priority3)
-	(test
-		(and
-			(> ?priority1 ?priority2)
-			(> ?priority2 ?priority3)
-			(> ?priority3 ?priority1)
-		)
-	)
-	=>
-;	(log-message ERROR "CYCLED PRIORITIES!" "\n"
-;		"\t\tAction types: " ?action_type1 " - " ?action_type2 " - " ?action_type3 "\n"
+; Priorities CAN be cycled, because transitivity is not a requisite
+;(defrule DETECT_ERROR-CYCLED_PRIORITIES
+;	(declare (salience 10000))
+;	(task_priority ?action_type1 ?priority1)
+;	(task_priority ?action_type2 ?priority2)
+;	(task_priority ?action_type3 ?priority3)
+;	(test
+;		(and
+;			(> ?priority1 ?priority2)
+;			(> ?priority2 ?priority3)
+;			(> ?priority3 ?priority1)
+;		)
 ;	)
-	(printout t "ERROR: CYCLED PRIORITIES!" crlf
-		tab tab "Action types: " ?action_type1 " - " ?action_type2 " - " ?action_type3 crlf
-	)
-	(halt)
-)
+;	=>
+;;	(log-message ERROR "CYCLED PRIORITIES!" "\n"
+;;		"\t\tAction types: " ?action_type1 " - " ?action_type2 " - " ?action_type3 "\n"
+;;	)
+;	(printout t "ERROR: CYCLED PRIORITIES!" crlf
+;		tab tab "Action types: " ?action_type1 " - " ?action_type2 " - " ?action_type3 crlf
+;	)
+;	(halt)
+;)
 
 (defrule DETECT_ERROR-REPEATED_PRIORITIES
 	(declare (salience 10000))
