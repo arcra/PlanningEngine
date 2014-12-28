@@ -251,7 +251,7 @@
 	)
 	=>
 	(assert
-		(PE-comparing ?t1 nil ?t1 0 0 ?t2 nil ?t2 0 0)
+		(PE-comparing ?t1 nil ?t1 ?t2 nil ?t2)
 	)
 )
 
@@ -261,7 +261,7 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ? ?current1 ? ? ?t2 ? ? ? ?)
+	?cmp <-(PE-comparing ?t1 ? ?current1 ?t2 ? ?)
 	(task (id ?current1) (plan ?planName) (action_type ?action_type1) (parent nil))
 	(task (id ?t2) (action_type ?action_type2))
 	(not
@@ -280,7 +280,7 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ? ?current1 ? ? ?t2 ? ? ? ?)
+	?cmp <-(PE-comparing ?t1 ? ?current1 ?t2 ? ?)
 	(PE-last_plan ?planName)
 	(task (id ?current1) (plan ~?planName) (action_type ?action_type1) (parent nil))
 	(not
@@ -298,7 +298,7 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?dr1 ?d1 ?t2 ?ref2 ?current2 ?dr2 ?d2)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
 	(task (id ?current1) (action_type ?action_type1) (parent ?parent1))
 	(not
 		(task_priority ?action_type1 ?)
@@ -307,7 +307,7 @@
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?t1 ?ref1 ?parent1 ?dr1 (+ ?d1 1) ?t2 ?ref2 ?current2 ?dr2 ?d2)
+		(PE-comparing ?t1 ?ref1 ?parent1 ?t2 ?ref2 ?current2)
 	)
 )
 
@@ -315,13 +315,13 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 nil ?current1 ? ?d1 ?t2 ?ref2 ?current2 ?dr2 ?d2)
+	?cmp <-(PE-comparing ?t1 nil ?current1 ?t2 ?ref2 ?current2)
 	(task (id ?current1) (action_type ?action_type1))
 	(task_priority ?action_type1 ?)
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?t1 ?current1 ?current1 ?d1 ?d1 ?t2 ?ref2 ?current2 ?dr2 ?d2)
+		(PE-comparing ?t1 ?current1 ?current1 ?t2 ?ref2 ?current2)
 	)
 )
 
@@ -332,7 +332,7 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ? ? ? ? ?t2 ? ?current2 ? ?)
+	?cmp <-(PE-comparing ?t1 ? ? ?t2 ? ?current2)
 	(task (id ?current2) (plan ?planName2) (action_type ?action_type2) (parent ?parent2))
 	(not
 		(task_priority ?action_type2 ?)
@@ -352,7 +352,7 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ? ? ? ? ?t2 ? ?current2 ? ?)
+	?cmp <-(PE-comparing ?t1 ? ? ?t2 ? ?current2)
 	(task (id ?current2) (plan ?planName2) (action_type ?action_type2) (parent ?parent2))
 	(not
 		(task_priority ?action_type2 ?)
@@ -372,7 +372,7 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?dr1 ?d1 ?t2 ?ref2 ?current2 ?dr2 ?d2)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
 	(task (id ?current2) (action_type ?action_type2) (parent ?parent2))
 	(not
 		(task_priority ?action_type2 ?)
@@ -381,7 +381,7 @@
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?t1 ?ref1 ?current1 ?dr1 ?d1 ?t2 ?ref2 ?parent2 ?dr2 (+ ?d2 1))
+		(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?parent2)
 	)
 )
 
@@ -389,354 +389,166 @@
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?dr1 ?d1 ?t2 nil ?current2 ? ?d2)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 nil ?current2)
 	(task (id ?current2) (action_type ?action_type2))
 	(task_priority ?action_type2 ?)
 	=>
 	(retract ?cmp)
 	(assert
-		(PE-comparing ?t1 ?ref1 ?current1 ?dr1 ?d1 ?t2 ?current2 ?current2 ?d2 ?d2)
-	)
-)
-
-; FIRST DIFFERENT
-;;;;;;;;;;;;;;;;;;
-
-(defrule set_task_active-search_top_priority_task-get_first_different-equal_priorities-no_parent-same_plan
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2&~nil ?current2 ? ?d2)
-	(task (id ?current1) (plan ?planName1) (action_type ?action_type1) (parent ?parent1))
-	(task (id ?ref2) (action_type ?action_type2))
-	(not (PE-getting_second_different) )
-	(task_priority ?action_type1 ?p1)
-	(task_priority ?action_type2 ?p2)
-	(test (= ?p1 ?p2))
-	(test (eq ?parent1 nil) )
-	(PE-last_plan ?planName)
-	(test (eq ?planName ?planName1 ) )
-	?d <-(PE-discarded $?discarded)
-	=>
-	(retract ?d ?cmp)
-	(assert
-		(PE-discarded $?discarded ?t2)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-get_first_different-equal_priorities-no_parent-different_plan
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2&~nil ?current2 ? ?d2)
-	(task (id ?current1) (plan ?planName1) (action_type ?action_type1) (parent ?parent1))
-	(task (id ?ref2) (action_type ?action_type2))
-	(not (PE-getting_second_different) )
-	(task_priority ?action_type1 ?p1)
-	(task_priority ?action_type2 ?p2)
-	(test (= ?p1 ?p2))
-	(test (eq ?parent1 nil) )
-	(PE-last_plan ?planName)
-	(test (neq ?planName ?planName1 ) )
-	?d <-(PE-discarded $?discarded)
-	=>
-	(retract ?d ?cmp)
-	(assert
-		(PE-discarded $?discarded ?t1)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-get_first_different-equal_priorities-parent
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?dr1 ?d1 ?t2 ?ref2&~nil ?current2 ?dr2 ?d2)
-	(not (PE-getting_second_different) )
-	(task (id ?current1) (plan ?planName1) (action_type ?action_type1) (parent ?parent1))
-	(task (id ?ref2) (action_type ?action_type2))
-	(task_priority ?action_type1 ?p1)
-	(task_priority ?action_type2 ?p2)
-	(test (= ?p1 ?p2))
-	(test (neq ?parent1 nil) )
-	=>
-	(retract ?cmp)
-	(assert
-		(PE-comparing ?t1 ?ref1 ?parent1 ?dr1 (+ ?d1 1) ?t2 ?ref2 ?current2 ?dr2 ?d2)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-get_first_different-different_priorities
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2&~nil ?current2 ? ?d2)
-	(not (PE-getting_second_different) )
-	(task (id ?current1) (action_type ?action_type1))
-	(task (id ?ref2) (action_type ?action_type2))
-	(task_priority ?action_type1 ?p1)
-	(task_priority ?action_type2 ?p2)
-	(test (neq ?p1 ?p2))
-	=>
-	(assert
-		(PE-getting_second_different)
-	)
-)
-
-; SECOND DIFFERENT
-;;;;;;;;;;;;;;;;;;
-
-(defrule set_task_active-search_top_priority_task-get_second_different-equal_priorities-no_parent-same_plan
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1&~nil ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	(PE-getting_second_different)
-	(task (id ?current2) (plan ?planName2) (action_type ?action_type2) (parent ?parent2))
-	(task (id ?ref1) (action_type ?action_type1))
-	(task_priority ?action_type1 ?p1)
-	(task_priority ?action_type2 ?p2)
-	(test (= ?p1 ?p2))
-	(test (eq ?parent2 nil) )
-	(PE-last_plan ?planName)
-	(test (eq ?planName ?planName2 ) )
-	?d <-(PE-discarded $?discarded)
-	=>
-	(retract ?d ?cmp)
-	(assert
-		(PE-discarded $?discarded ?t1)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-get_second_different-equal_priorities-no_parent-different_plan
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1&~nil ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	(PE-getting_second_different)
-	(task (id ?current2) (plan ?planName2) (action_type ?action_type2) (parent ?parent2))
-	(task (id ?ref1) (action_type ?action_type1))
-	(task_priority ?action_type1 ?p1)
-	(task_priority ?action_type2 ?p2)
-	(test (= ?p1 ?p2))
-	(test (eq ?parent2 nil) )
-	(PE-last_plan ?planName)
-	(test (neq ?planName ?planName2 ) )
-	?d <-(PE-discarded $?discarded)
-	=>
-	(retract ?d ?cmp)
-	(assert
-		(PE-discarded $?discarded ?t2)
-	)
-)
-
-(defrule set_task_active-search_top_priority_task-get_second_different-equal_priorities-parent
-	(PE-allTasksEnabled)
-	(PE-ready_to_plan)
-	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1&~nil ?current1 ?dr1 ?d1 ?t2 ?ref2 ?current2 ?dr2 ?d2)
-	(PE-getting_second_different)
-	(task (id ?current2) (action_type ?action_type2) (parent ?parent2))
-	(task (id ?ref1) (action_type ?action_type1))
-	(task_priority ?action_type1 ?p1)
-	(task_priority ?action_type2 ?p2)
-	(test (= ?p1 ?p2))
-	(test (neq ?parent2 nil) )
-	=>
-	(retract ?cmp)
-	(assert
-		(PE-comparing ?t1 ?ref1 ?current1 ?dr1 ?d1 ?t2 ?ref2 ?parent2 ?dr2 (+ ?d2 1))
+		(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?current2 ?current2)
 	)
 )
 
 ; GET WINNER
 ;;;;;;;;;;;;;;;;;;
 
-(defrule set_task_active-search_top_priority_task-get_winner-different_winner-currents_win-different_distances-first_wins
+(defrule set_task_active-search_top_priority_task-get_winner-first_wins
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	?gsd <-(PE-getting_second_different)
-	(task (id ?current1) (action_type ?action_type1))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
 	(task (id ?ref1) (action_type ?action_type_ref1))
-	(task (id ?current2) (action_type ?action_type2))
 	(task (id ?ref2) (action_type ?action_type_ref2))
-	(task_priority ?action_type1 ?pc1)
 	(task_priority ?action_type_ref1 ?pr1)
-	(task_priority ?action_type2 ?pc2)
 	(task_priority ?action_type_ref2 ?pr2)
-	(and
-		(test (> ?pc1 ?pr2))
-		(test (> ?pc2 ?pr1))
-	)
-	(test (< ?d1 ?d2))
+	(test (> ?pr1 ?pr2))
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?gsd ?d)
+	(retract ?cmp ?d)
 	(assert
 		(PE-discarded $?discarded ?t2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-get_winner-different_winner-currents_win-different_distances-second_wins
+(defrule set_task_active-search_top_priority_task-get_winner-second_wins
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	?gsd <-(PE-getting_second_different)
-	(task (id ?current1) (action_type ?action_type1))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
 	(task (id ?ref1) (action_type ?action_type_ref1))
-	(task (id ?current2) (action_type ?action_type2))
 	(task (id ?ref2) (action_type ?action_type_ref2))
-	(task_priority ?action_type1 ?pc1)
 	(task_priority ?action_type_ref1 ?pr1)
-	(task_priority ?action_type2 ?pc2)
 	(task_priority ?action_type_ref2 ?pr2)
-	(and
-		(test (> ?pc1 ?pr2))
-		(test (> ?pc2 ?pr1))
-	)
-	(test (> ?d1 ?d2))
+	(test (> ?pr2 ?pr1))
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?gsd ?d)
+	(retract ?cmp ?d)
 	(assert
 		(PE-discarded $?discarded ?t1)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-get_winner-different_winner-references_win-different_distances-first_wins
+; GET NEXT REFERENCES
+;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule set_task_active-search_top_priority_task-get_new_references-first_no_parent-same_plan
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	?gsd <-(PE-getting_second_different)
-	(task (id ?current1) (action_type ?action_type1))
-	(task (id ?ref1) (action_type ?action_type_ref1))
-	(task (id ?current2) (action_type ?action_type2))
-	(task (id ?ref2) (action_type ?action_type_ref2))
-	(task_priority ?action_type1 ?pc1)
-	(task_priority ?action_type_ref1 ?pr1)
-	(task_priority ?action_type2 ?pc2)
-	(task_priority ?action_type_ref2 ?pr2)
-	(and
-		(test (> ?pr1 ?pc2))
-		(test (> ?pr2 ?pc1))
-	)
-	(test (< ?dr1 ?dr2))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
+	(task (id ?current1) (parent ?parent1))
+	(task (id ?current2) (parent ?parent2))
+	(task (id ?ref1) (plan ?planName1) (action_type ?action_type1))
+	(task (id ?ref2) (action_type ?action_type2))
+	(task_priority ?action_type1 ?p1)
+	(task_priority ?action_type2 ?p2)
+	(test (= ?p1 ?p2))
+	(test (eq ?parent1 nil))
+	(PE-last_plan ?planName)
+	(test (eq ?planName1 ?planName))
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?gsd ?d)
+	(retract ?d ?cmp)
 	(assert
 		(PE-discarded $?discarded ?t2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-get_winner-different_winner-references_win-different_distances-second_wins
+(defrule set_task_active-search_top_priority_task-get_new_references-first_no_parent-different_plan
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	?gsd <-(PE-getting_second_different)
-	(task (id ?current1) (action_type ?action_type1))
-	(task (id ?ref1) (action_type ?action_type_ref1))
-	(task (id ?current2) (action_type ?action_type2))
-	(task (id ?ref2) (action_type ?action_type_ref2))
-	(task_priority ?action_type1 ?pc1)
-	(task_priority ?action_type_ref1 ?pr1)
-	(task_priority ?action_type2 ?pc2)
-	(task_priority ?action_type_ref2 ?pr2)
-	(and
-		(test (> ?pr1 ?pc2))
-		(test (> ?pr2 ?pc1))
-	)
-	(test (> ?dr1 ?dr2))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
+	(task (id ?current1) (parent ?parent1))
+	(task (id ?current2) (parent ?parent2))
+	(task (id ?ref1) (plan ?planName1) (action_type ?action_type1))
+	(task (id ?ref2) (action_type ?action_type2))
+	(task_priority ?action_type1 ?p1)
+	(task_priority ?action_type2 ?p2)
+	(test (= ?p1 ?p2))
+	(test (eq ?parent1 nil))
+	(PE-last_plan ?planName)
+	(test (neq ?planName1 ?planName))
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?gsd ?d)
+	(retract ?d ?cmp)
 	(assert
 		(PE-discarded $?discarded ?t1)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-get_winner-different_winner-same_distances
+(defrule set_task_active-search_top_priority_task-get_new_references-second_no_parent-same_plan
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	?gsd <-(PE-getting_second_different)
-	(task (id ?current1) (action_type ?action_type1))
-	(task (id ?ref1) (action_type ?action_type_ref1))
-	(task (id ?current2) (action_type ?action_type2))
-	(task (id ?ref2) (action_type ?action_type_ref2))
-	(task_priority ?action_type1 ?pc1)
-	(task_priority ?action_type_ref1 ?pr1)
-	(task_priority ?action_type2 ?pc2)
-	(task_priority ?action_type_ref2 ?pr2)
-	(or
-		(and
-			(test (> ?pc1 ?pr2))
-			(test (> ?pc2 ?pr1))
-			(test (= ?d2 ?d1))
-		)
-		(and
-			(test (> ?pr1 ?pc2))
-			(test (> ?pr2 ?pc1))
-			(test (= ?dr2 ?dr1))
-		)
-	)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
+	(task (id ?current1) (parent ?parent1))
+	(task (id ?current2) (parent ?parent2))
+	(task (id ?ref1) (action_type ?action_type1))
+	(task (id ?ref2) (plan ?planName2) (action_type ?action_type2))
+	(task_priority ?action_type1 ?p1)
+	(task_priority ?action_type2 ?p2)
+	(test (= ?p1 ?p2))
+	(test (eq ?parent2 nil))
+	(PE-last_plan ?planName)
+	(test (eq ?planName2 ?planName))
+	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?gsd)
+	(retract ?d ?cmp)
 	(assert
-		(PE-comparing ?t1 ?current1 ?current1 ?d1 ?d1 ?t2 ?current2 ?current2 ?d2 ?d2)
+		(PE-discarded $?discarded ?t1)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-get_winner-same_winner-first_wins
+(defrule set_task_active-search_top_priority_task-get_new_references-second_no_parent-different_plan
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	?gsd <-(PE-getting_second_different)
-	(task (id ?current1) (action_type ?action_type1))
-	(task (id ?ref1) (action_type ?action_type_ref1))
-	(task (id ?current2) (action_type ?action_type2))
-	(task (id ?ref2) (action_type ?action_type_ref2))
-	(task_priority ?action_type1 ?pc1)
-	(task_priority ?action_type_ref2 ?pr2)
-	(task_priority ?action_type_ref1 ?pr1)
-	(task_priority ?action_type2 ?pc2)
-	(test (> ?pc1 ?pr2))
-	(test (> ?pr1 ?pc2))
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
+	(task (id ?current1) (parent ?parent1))
+	(task (id ?current2) (parent ?parent2))
+	(task (id ?ref1) (action_type ?action_type1))
+	(task (id ?ref2) (plan ?planName2) (action_type ?action_type2))
+	(task_priority ?action_type1 ?p1)
+	(task_priority ?action_type2 ?p2)
+	(test (= ?p1 ?p2))
+	(test (eq ?parent2 nil))
+	(PE-last_plan ?planName)
+	(test (neq ?planName2 ?planName))
 	?d <-(PE-discarded $?discarded)
 	=>
-	(retract ?cmp ?gsd ?d)
+	(retract ?d ?cmp)
 	(assert
 		(PE-discarded $?discarded ?t2)
 	)
 )
 
-(defrule set_task_active-search_top_priority_task-get_winner-same_winner-second_wins
+(defrule set_task_active-search_top_priority_task-get_new_references
 	(PE-allTasksEnabled)
 	(PE-ready_to_plan)
 	(not (PE-activable_task ?))
-	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ? ?d1 ?t2 ?ref2 ?current2 ? ?d2)
-	?gsd <-(PE-getting_second_different)
-	(task (id ?current1) (action_type ?action_type1))
-	(task (id ?ref1) (action_type ?action_type_ref1))
-	(task (id ?current2) (action_type ?action_type2))
-	(task (id ?ref2) (action_type ?action_type_ref2))
-	(task_priority ?action_type1 ?pc1)
-	(task_priority ?action_type_ref2 ?pr2)
-	(task_priority ?action_type_ref1 ?pr1)
-	(task_priority ?action_type2 ?pc2)
-	(test (> ?pc2 ?pr1))
-	(test (> ?pr2 ?pc1))
-	?d <-(PE-discarded $?discarded)
+	?cmp <-(PE-comparing ?t1 ?ref1 ?current1 ?t2 ?ref2 ?current2)
+	(task (id ?current1) (parent ?parent1&~nil))
+	(task (id ?current2) (parent ?parent2&~nil))
+	(task (id ?ref1) (action_type ?action_type1))
+	(task (id ?ref2) (action_type ?action_type2))
+	(task_priority ?action_type1 ?p1)
+	(task_priority ?action_type2 ?p2)
+	(test (= ?p1 ?p2))
 	=>
-	(retract ?cmp ?gsd ?d)
+	(retract ?cmp)
 	(assert
-		(PE-discarded $?discarded ?t1)
+		(PE-comparing ?t1 nil ?parent1 ?t2 nil ?parent2)
 	)
 )
 
@@ -751,6 +563,7 @@
 	)
 	?et <-(PE-enabled_task ?t)
 	?d <-(PE-discarded $?discarded)
+	(task (id ?t) (plan ?planName))
 	; There's no other enabled task that is not discarded. (i. e. this is the only one activable.)
 	(not
 		(and
@@ -762,11 +575,13 @@
 			)
 		)
 	)
+	?lp <-(PE-last_plan ?)
 	=>
-	(retract ?et ?d)
+	(retract ?et ?d ?lp)
 	(assert
 		(PE-activable_task ?t)
 		(PE-activable_tasks ?t)
+		(PE-last_plan ?planName)
 	)
 )
 

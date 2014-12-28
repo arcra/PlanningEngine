@@ -126,8 +126,8 @@
 	(retract ?ts ?at ?task)
 	(log-message INFO "Top level task of plan '" ?planName "' with action_type: '" ?action_type "' and params: '" $?params "' succeeded!")
 
-	(task (plan ?planName) (action_type spg_say) (params "I have finished the task " ?planName) (step ?step) (parent ?t))
-	(task (plan ?planName) (action_type PE-success) (params "") (step (+ ?step 1)) (parent ?t))
+	(task (plan ?planName) (action_type spg_say) (params "I have finished the task " ?planName) (step ?step) )
+	(task (plan ?planName) (action_type PE-success) (params "") (step (+ ?step 1)) )
 )
 
 ; Salience should prevent the previous rule to catch this action_type, but for redundancy and a more elegant design, action_type is validated.
