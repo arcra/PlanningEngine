@@ -11,7 +11,7 @@
 (defrule delete_task_status
 	(declare (salience 9800))
 	?ts <-(task_status ?t)
-	(not (task (id ?t) )
+	(not (task (id ?t) ))
 	=>
 	(retract ?ts)
 	(log-message INFO "Deleted orphan task_status.")
@@ -86,15 +86,7 @@
 	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	(not
-		(and
-			(task (plan ?planName) (step ? $?steps) (params $?params2) (action_type ?action_type2))
-			(test
-				(or
-					(neq $?params $?params2)
-					(neq ?action_type ?action_type2)
-				)
-			)
-		)
+		(task (id ~?t) (plan ?planName) (step ? $?steps))
 	)
 	=>
 	(retract ?ts ?at ?task)
@@ -112,22 +104,15 @@
 	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	(not
-		(and
-			(task (plan ?planName) (step ?) (action_type ?action_type2) (params $?params2))
-			(test
-				(or
-					(neq ?action_type ?action_type2)
-					(neq $?params $?params2)
-				)
-			)
-		)
+		(task (id ~?t) (plan ?planName) (step ?))
 	)
 	=>
 	(retract ?ts ?at ?task)
 	(log-message INFO "Top level task of plan '" ?planName "' with action_type: '" ?action_type "' and params: '" $?params "' succeeded!")
-
-	(task (plan ?planName) (action_type spg_say) (params "I have finished the task " ?planName) (step ?step) )
-	(task (plan ?planName) (action_type PE-success) (params "") (step (+ ?step 1)) )
+	(assert
+		(task (plan ?planName) (action_type spg_say) (params "I have finished the task " ?planName) (step ?step) )
+		(task (plan ?planName) (action_type PE-success) (params "") (step (+ ?step 1)) )
+	)
 )
 
 ; Salience should prevent the previous rule to catch this action_type, but for redundancy and a more elegant design, action_type is validated.
@@ -227,15 +212,7 @@
 	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	(not
-		(and
-			(task (plan ?planName) (step ? ?next_step $?steps) (params $?params2) (action_type ?action_type2))
-			(test
-				(or
-					(neq ?action_type ?action_type2)
-					(neq $?params $?params2)
-				)
-			)
-		)
+		(task (id ~?t) (plan ?planName) (step ? ?next_step $?steps) )
 	)
 	=>
 	(retract ?ts ?at ?task)
@@ -249,13 +226,7 @@
 	(not (task (parent ?t)))
 	?at <-(active_task ?t)
 	(not
-		(and
-			(task (plan ?planName) (step ?) (params $?params2) (action_type ?action_type2))
-			(test
-				(neq ?action_type ?action_type2)
-				(neq $?params $?params2)
-			)
-		)
+		(task (id ~?t) (plan ?planName) (step ?))
 	)
 	=>
 	(retract ?ts ?at ?task)

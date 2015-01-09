@@ -21,8 +21,7 @@
 	(BB_answer "mp_position" check_location_exists 0 ?)
 	=>
 	(assert
-		(task (plan ?planName) (action_type spg_say) (params "I found the error, I do not know the location" ?location) (step $?steps) (parent ?pt))
-		(task_status ?t successful)
+		(task_status ?t failed)
 	)
 )
 
@@ -36,16 +35,20 @@
 	(BB_answer "mp_position" check_location_exists 1 ?)
 	=>
 	(assert
-		(task_status ?t failed)
+		(task_status ?t successful)
 	)
 )
 
 (defrule check_location_exists-finished
-	(task (id ?t) (action_type check_location_exists))
+	(task (id ?t) (action_type check_location_exists) (params ?location))
 	(active_task ?t)
 	(task_status ?t ?)
+	(not (cancel_active_tasks))
 	=>
-	(assert
-		(checked_location_exists)
+	(bind ?f
+		(assert
+			(checked_location_exists ?location)
+		)
 	)
+	(set_delete ?f 20)
 )

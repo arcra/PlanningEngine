@@ -8,6 +8,7 @@
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
+	(speech_notification_sent getclose_location)
 	(not (moving))
 	=>
 	(assert
@@ -62,7 +63,6 @@
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
-	(waiting (symbol getclose_location))
 	(not (speech_notification_sent getclose_location) )
 	=>
 	(assert
@@ -88,18 +88,6 @@
 	(send-command "mp_stop" cancel_getclose_location "" 1000)
 )
 
-(defrule getclose_location-cancel-successful_response
-	(task (id ?t) (action_type getclose_location))
-	?at <-(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
-	(cancel_active_tasks)
-	(BB_answer "mp_stop" cancel_getclose_location 1 ?)
-	=>
-	(retract ?at)
-)
-
 (defrule getclose_location-cancel-failed_response
 	(task (id ?t) (action_type getclose_location))
 	(active_task ?t)
@@ -110,4 +98,60 @@
 	(BB_answer "mp_stop" cancel_getclose_location 0 ?)
 	=>
 	(send-command "mp_stop" cancel_getclose_location "" 1000)
+)
+
+(defrule getclose_location-cancel-successful_response-moving-speech
+	(task (id ?t) (action_type getclose_location))
+	(active_task ?t)
+	(not
+		(task_status ?t ?)
+	)
+	(cancel_active_tasks)
+	(BB_answer "mp_stop" cancel_getclose_location 1 ?)
+	?sn <-(speech_notification_sent getclose_location)
+	?m <-(moving)
+	=>
+	(retract ?sn ?m)
+)
+
+(defrule getclose_location-cancel-successful_response-not_moving-speech
+	(task (id ?t) (action_type getclose_location))
+	(active_task ?t)
+	(not
+		(task_status ?t ?)
+	)
+	(cancel_active_tasks)
+	(BB_answer "mp_stop" cancel_getclose_location 1 ?)
+	?sn <-(speech_notification_sent getclose_location)
+	(not (moving))
+	=>
+	(retract ?sn)
+)
+
+(defrule getclose_location-cancel-successful_response-not_speech-moving
+	(task (id ?t) (action_type getclose_location))
+	(active_task ?t)
+	(not
+		(task_status ?t ?)
+	)
+	(cancel_active_tasks)
+	(BB_answer "mp_stop" cancel_getclose_location 1 ?)
+	(not (speech_notification_sent getclose_location) )
+	?m <-(moving)
+	=>
+	(retract ?m)
+)
+
+(defrule getclose_location-cancel-successful_response-not_speech-not_moving
+	(task (id ?t) (action_type getclose_location))
+	?at <-(active_task ?t)
+	(not
+		(task_status ?t ?)
+	)
+	(cancel_active_tasks)
+	(BB_answer "mp_stop" cancel_getclose_location 1 ?)
+	(not (speech_notification_sent getclose_location) )
+	(not (moving))
+	=>
+	(retract ?at)
 )

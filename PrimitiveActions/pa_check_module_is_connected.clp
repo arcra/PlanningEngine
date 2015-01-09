@@ -11,7 +11,7 @@
 	(send-command "connected" (sym-cat check_module_is_connected_ ?module) ?module)
 )
 
-(defrule check_module_is_connected-does_NOT_respond
+(defrule check_module_is_connected-not_connected
 	(task (id ?t) (plan ?planName) (action_type check_module_is_connected) (params ?module) (step $?steps) )
 	(active_task ?t)
 	(not
@@ -21,12 +21,11 @@
 	(BB_answer "connected" =(sym-cat check_module_is_connected_ ?module) 0 ?)
 	=>
 	(assert
-		(task (plan ?planName) (action_type spg_say) (params "I found the error, the module: " ?module " is not running or is not working properly.") (step $?steps) (parent ?t))
-		(task_status ?t successful)
+		(task_status ?t failed)
 	)
 )
 
-(defrule check_module_is_connected-responds
+(defrule check_module_is_connected-connected
 	(task (id ?t) (action_type check_module_is_connected) (params ?module))
 	(active_task ?t)
 	(not
@@ -36,7 +35,7 @@
 	(BB_answer "connected" =(sym-cat check_module_is_connected_ ?module) 1 ?)
 	=>
 	(assert
-		(task_status ?t failed)
+		(task_status ?t successful)
 	)
 )
 
@@ -44,8 +43,12 @@
 	(task (id ?t) (action_type check_module_is_connected) (params ?module))
 	(active_task ?t)
 	(task_status ?t ?)
+	(not (cancel_active_tasks))
 	=>
-	(assert
-		(checked_module_is_connected ?module)
+	(bind ?f
+		(assert
+			(checked_module_is_connected ?module)
+		)
 	)
+	(set_delete ?f 20)
 )
