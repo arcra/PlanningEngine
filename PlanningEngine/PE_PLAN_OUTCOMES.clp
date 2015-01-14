@@ -142,7 +142,7 @@
 
 (defrule failed_task-mark_task_without_rules_as_failed-set_failure_task ; When a task has no rules (either to assert new sub-tasks or perform an action) it is either an incomplete design or (most likely) a task set to re-plan but with no more alternatives, which should be marked as failed.
 	(declare (salience -9500))
-	(task (id ?t) (plan ?planName) (step $?steps) (action_type ?action_type&~PE-fail)) ; see next rule
+	(task (id ?t) (plan ?planName) (step $?steps) (action_type ?action_type&~PE-fail) (params $?params)) ; see next rule
 	(active_task ?t)
 	(not (waiting))
 	(not (timer_sent $?))
@@ -154,6 +154,9 @@
 		(task (plan ?planName) (action_type PE-fail) (params "") (step 2 $?steps) (parent ?t))
 		(PE-failed ?t)
 	)
+	(log-message INFO "Task " ?t " failed. (No executable rules).")
+	(log-message INFO "Task " ?t ": " ?planName " - " ?action_type " - " $?params)
+	(stop)
 )
 
 (defrule failed_task-mark_task_without_rules_as_failed-after_failure_task
@@ -202,7 +205,7 @@
 	)
 	=>
 	(retract ?task2)
-	(log-message WARNING "Plan '" ?action_type "'' with steps: '" ?step " " $?steps "' failed. Deleted same hierarchy task for plan '" ?planName "' with action_type: '" ?action_type2 "' and params: '" $?params2 "'.")
+	(log-message WARNING "Plan '" ?action_type "' with steps: '" ?step " " $?steps "' failed. Deleted same hierarchy task for plan '" ?planName "' with action_type: '" ?action_type2 "' and params: '" $?params2 "'.")
 )
 
 (defrule failed_task-delete_failed_task ; After removing all other same-hierarchy tasks, remove this task and let the engine replan. (this rule applies to non-top-level tasks)

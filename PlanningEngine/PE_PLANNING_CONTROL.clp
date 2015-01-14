@@ -34,6 +34,7 @@
 	(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
 	(not (task_status ? ?))
+	(not (BB_answer $?))
 	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	?at <-(active_task ?t)
 	; There's another task of the same plan that should have been activated before this one.
@@ -125,6 +126,7 @@
 	(assert
 		(PE-ready_to_plan)
 	)
+	(log-message INFO "Ready to plan.")
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -646,15 +648,48 @@
 	(retract ?at)
 )
 
-(defrule set_task_active-search_parallel_tasks-delete_activable_tasks
+(defrule set_task_active-search_parallel_tasks-start_logging
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not
+		(PE-activable_task ?)
+	)
+	(PE-activable_tasks $?tasks)
+	(not (PE-logged_tasks $?))
+	=>
+	(assert
+		(PE-logged_tasks)
+	)
+)
+
+(defrule set_task_active-search_parallel_tasks-log_activated_tasks
+	(PE-allTasksEnabled)
+	(PE-ready_to_plan)
+	(not
+		(PE-activable_task ?)
+	)
+	?ats <-(PE-activable_tasks ?at $?tasks)
+	?lt <-(PE-logged_tasks $?logged)
+	(task (id ?at) (plan ?planName) (action_type ?action_type) (params $?params))
+	=>
+	(retract ?lt ?ats)
+	(assert
+		(PE-logged_tasks $?logged ?at)
+		(PE-activable_tasks $?tasks)
+	)
+	(log-message INFO "Task activated (" ?at "): " ?planName " - " ?action_type " - " $?params)
+)
+
+(defrule set_task_active-search_parallel_tasks-stop_logging
 	(PE-allTasksEnabled)
 	?rtp <-(PE-ready_to_plan)
 	(not
 		(PE-activable_task ?)
 	)
-	?ats <-(PE-activable_tasks $?tasks)
+	?ats <-(PE-activable_tasks)
+	?lt <-(PE-logged_tasks $?tasks)
 	=>
-	(retract ?ats ?rtp)
+	(retract ?lt ?ats ?rtp)
 	(progn$ (?at $?tasks)
 		(assert (active_task ?at))
 	)

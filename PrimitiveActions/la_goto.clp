@@ -7,7 +7,7 @@
 	(not (waiting (symbol la_goto)))
 	(not (BB_answer "la_goto" la_goto ? ?))
 	=>
-	(send-command "la_goto" la_goto ?position 10000)
+	(send-command "la_goto" la_goto ?position 25000)
 )
 
 (defrule la_goto-failed_or_timedout
@@ -18,7 +18,7 @@
 
 	(BB_answer "la_goto" la_goto 0 ?)
 	=>
-	(send-command "la_goto" la_goto ?position 10000)
+	(send-command "la_goto" la_goto ?position 25000)
 )
 
 (defrule la_goto-succeeded

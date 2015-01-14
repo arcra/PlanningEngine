@@ -7,7 +7,7 @@
 	(not (waiting (symbol ra_goto)))
 	(not (BB_answer "ra_goto" ra_goto ? ?))
 	=>
-	(send-command "ra_goto" ra_goto ?position 10000)
+	(send-command "ra_goto" ra_goto ?position 25000)
 )
 
 (defrule ra_goto-failed_or_timedout
@@ -18,7 +18,7 @@
 
 	(BB_answer "ra_goto" ra_goto 0 ?)
 	=>
-	(send-command "ra_goto" ra_goto ?position 10000)
+	(send-command "ra_goto" ra_goto ?position 25000)
 )
 
 (defrule ra_goto-succeeded

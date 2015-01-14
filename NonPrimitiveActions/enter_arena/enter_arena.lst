@@ -1,0 +1,5 @@
+enter_arena.clp
+../check_getclose_location/check_getclose_location.lst
+../arms_goto/arms_goto.lst
+../../PrimitiveActions/wait_obstacle.lst
+../../PrimitiveActions/getclose_location.lst
