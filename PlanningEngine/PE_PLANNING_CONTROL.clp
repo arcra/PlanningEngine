@@ -34,7 +34,6 @@
 	(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
 	(not (task_status ? ?))
-	(not (BB_answer $?))
 	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	?at <-(active_task ?t)
 	; There's another task of the same plan that should have been activated before this one.
@@ -87,6 +86,15 @@
 	?ate <-(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
 	(not (task_status ? ?))
+	; Re-planning only happens when the previous action either ended OR was interrupted
+	; by one with a higher priority. In which case, late responses are not desired.
+	(not (BB_answer $?))
+	; children_status, on the other hand, are linked with a specific task that was being
+	; executed and their outcome might determine the next action to execute when said task
+	; is resumed.
+	; HOWEVER, maybe the cancelation rules should handle the status of the execution
+	; So it wouldn't depend on the children_status facts.
+	(not (children_status $?))
 	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	(not (active_task ?t))
 	; There's no active task that cannot run in parallel with this one.

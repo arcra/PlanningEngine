@@ -21,13 +21,3 @@
         (default nil)
     )
 )
-
-(deffacts PE-init_facts
-    (PE-last_plan nil)
-    (right_arm nil)
-    (left_arm nil)
-)
-
-(deffacts PE-settings
-    (can_run_in_parallel la_goto ra_goto)
-)

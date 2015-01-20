@@ -12,7 +12,6 @@
 	(assert
 		(finding_free_space right -0.15)
 	)
-
 )
 
 (defrule cubes_find_free_space-left-start_finding
@@ -50,7 +49,8 @@
 	(not
 		(and
 			(stack ?base1 $?)
-			(cube ?base1 ? ?y1 ?)
+			(cube ?base1 ?x1 ?y1 ?)
+			(test (< ?x1 0.3))
 			(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
 			(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
 		)
@@ -58,10 +58,11 @@
 	; Find the ?x ad ?z of any base cube
 	(stack ?base $?)
 	(cube ?base ?x ? ?z)
+	(test (< ?x 0.3))
 	=>
 	(retract ?ffs)
 	(assert
-		(cubes_free_space ?side (min ?x 18.0) ?y (max ?z 65.0)
+		(cubes_free_space ?side (min ?x 0.18) ?y (max ?z 0.65))
 		(task_status ?t successful)
 	)
 )
@@ -76,8 +77,11 @@
 	(not (cancel_active_tasks))
 
 	?ffs <-(finding_free_space left ?y)
+	(test (> ?y (- 0 ?*cube_side*)))
+
 	(stack ?base1 $?)
-	(cube ?base1 ? ?y1 ?)
+	(cube ?base1 ?x1 ?y1 ?)
+	(test (< ?x1 0.3))
 	(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
 	(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
 
@@ -96,9 +100,11 @@
 	(not (cancel_active_tasks))
 
 	?ffs <-(finding_free_space left ?y)
+	(test (< ?y 0.5))
 
 	(stack ?base1 $?)
-	(cube ?base1 ? ?y1 ?)
+	(cube ?base1 ?x1 ?y1 ?)
+	(test (< ?x1 0.3))
 	(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
 	(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
 
@@ -137,7 +143,8 @@
 	(test (= ?y (- 0 ?*cube_side*)))
 
 	(stack ?base1 $?)
-	(cube ?base1 ? ?y1 ?)
+	(cube ?base1 ?x1 ?y1 ?)
+	(test (< ?x1 0.3))
 	(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
 	(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
 
@@ -176,6 +183,12 @@
 	?ffs <-(finding_free_space left ?y)
 	(test (= ?y 0.47))
 
+	(stack ?base1 $?)
+	(cube ?base1 ?x1 ?y1 ?)
+	(test (< ?x1 0.3))
+	(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
+	(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
+
 	(cubes_searched_first_side left)
 	=>
 	(retract ?ffs)
@@ -195,7 +208,8 @@
 
 	?ffs <-(finding_free_space right ?y)
 	(stack ?base1 $?)
-	(cube ?base1 ? ?y1 ?)
+	(cube ?base1 ?x1 ?y1 ?)
+	(test (< ?x1 0.3))
 	(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
 	(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
 
@@ -216,7 +230,8 @@
 	?ffs <-(finding_free_space right ?y)
 
 	(stack ?base1 $?)
-	(cube ?base1 ? ?y1 ?)
+	(cube ?base1 ?x1 ?y1 ?)
+	(test (< ?x1 0.3))
 	(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
 	(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
 
@@ -254,6 +269,12 @@
 	?ffs <-(finding_free_space right ?y)
 	(test (= ?y ?*cube_side*))
 
+	(stack ?base1 $?)
+	(cube ?base1 ?x1 ?y1 ?)
+	(test (< ?x1 0.3))
+	(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
+	(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
+
 	(not (cubes_searched_first_side right))
 	=>
 	(retract ?ffs)
@@ -289,6 +310,12 @@
 	?ffs <-(finding_free_space right ?y)
 	(test (= ?y -0.47))
 
+	(stack ?base1 $?)
+	(cube ?base1 ?x1 ?y1 ?)
+	(test (< ?x1 0.3))
+	(test (< ?y1 (+ ?y (* ?*side_offset* ?*cube_offset*))))
+	(test (> ?y1 (- ?y (* ?*side_offset* ?*cube_offset*))))
+
 	(cubes_searched_first_side right)
 	=>
 	(retract ?ffs)
@@ -296,7 +323,6 @@
 		(task_status ?t failed)
 	)
 )
-
 
 ;			CLEAN UP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

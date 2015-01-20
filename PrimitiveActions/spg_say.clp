@@ -35,3 +35,5 @@
 		(task_status ?t successful)
 	)
 )
+
+; ADD CHECK_SPG_SAY

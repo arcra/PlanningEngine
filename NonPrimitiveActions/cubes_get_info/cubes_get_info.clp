@@ -1,5 +1,5 @@
 (defrule cubes_get_info-delete_cubes
-	(task (id ?t) (plan ?planName) (action_type cubes_get_info) (step ?step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_get_info) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -11,7 +11,22 @@
 	)
 	=>
 	(assert
-		(task (plan ?planName) (action_type cubes_delete_info) (step (- ?step 1) $?steps) (parent ?pt))
+		(task (plan ?planName) (action_type cubes_delete_info) (step 1 $?steps) (parent ?t))
+	)
+)
+
+(defrule cubes_get_info-send_arms_to_navigation
+	(task (id ?t) (plan ?planName) (action_type cubes_get_info) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(not (cubes_info $?))
+	(not (cube $?))
+	(arm_info (position ~"navigation"))
+	=>
+	(assert
+		(task (plan ?planName) (action_type arms_goto) (params "navigation") (step 1 $?steps) (parent ?t))
 	)
 )
 
@@ -21,13 +36,36 @@
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
+	(arm_info (side right) (position "navigation"))
+	(arm_info (side left) (position "navigation"))
 	(not (cubes_info $?))
 	(not (cube $?))
-	(not (waiting (symbol detect_cubes)))
-	(not (BB_answer "detectcubes" detect_cubes 1 ?))
+	(not (cubes_get_info getting_info))
 	=>
 	(send-command "detectcubes" detect_cubes "all" 10000)
+	(assert
+		(cubes_get_info getting_info)
+	)
 )
+
+(defrule cubes_get_info-detect_cubes-failed
+	(task (id ?t) (plan ?planName) (action_type cubes_get_info) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(BB_answer "detectcubes" detect_cubes 0 ?)
+	?f <-(cubes_get_info getting_info)
+	=>
+	(retract ?f)
+	(assert
+		(task (plan ?planName) (action_type spg_say)
+			(params "I could not find any cubes, I will try again.") (step 1 $?steps) (parent ?t))
+	)
+)
+
+; ADD CHECK_DETECT_CUBES (in the previous rule)
+
 
 (defrule cubes_get_info-cubes_get_info
 	(task (id ?t) (plan ?planName) (action_type cubes_get_info))
@@ -39,8 +77,10 @@
 
 	(not (cubes_info $?))
 	(not (cube $?))
-	?dc <-(BB_answer "detectcubes" detect_cubes 1 ?cubes_info)
+	(BB_answer "detectcubes" detect_cubes 1 ?cubes_info)
+	?f <-(cubes_get_info getting_info)
 	=>
+	(retract ?f)
 	(assert
 		(getting_cubes_info)
 		(cubes_info (explode$ ?cubes_info))

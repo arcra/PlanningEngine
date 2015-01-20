@@ -1,5 +1,24 @@
-(defrule cubes_take_cube-arm_busy
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step ?step $?steps) (parent ?pt))
+;				SUCCESSFUL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule cubes_take_cube-successful
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(arm_info (grabbing ?cube))
+	=>
+	(assert
+		(task_status ?t successful)
+	)
+)
+
+;				EXECUTING
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule cubes_take_cube-arm_busy-right
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -7,29 +26,128 @@
 	(stack $? ?cube)
 	(cube ?cube ? ?y ?)
 
-	(or
+	; Right arm is NOT free
+	(arm_info (side right) (grabbing ?obj&~nil))
+	; Cube is in right arm's reach
+	;(test (< ?y ?*cube_side*))
+	(test (< ?y 0))
+	; Cube is NOT in left arm's reach or left arm is also busy.
+	(not
 		(and
-			; Cube is in right arm's reach
-			(test (< ?y ?*cube_side*))
-			; Right arm is NOT free
-			(right_arm ?obj&~nil)
-		)
-		(and
-			; Cube is in left arm's reach
-			(test (> ?y (- 0 ?*cube_side*)))
-			; Left arm is NOT free
-			(left_arm ?obj&~nil)
+			;(test (> ?y (- 0 ?*cube_side*)))
+			(test (> ?y 0))
+			(arm_info (side left) (grabbing nil))
 		)
 	)
+	(not (cubes_take_cube freeing_arm ?))
 	=>
 	(assert
 		(task (plan ?planName) (action_type cubes_put_cube) (params ?obj free)
-			(step (- ?step 1) $?steps) (parent ?pt))
+			(step 1 $?steps) (parent ?t))
+		(cubes_take_cube freeing_arm right)
+	)
+)
+
+(defrule cubes_take_cube-arm_busy-left
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(stack $? ?cube)
+	(cube ?cube ? ?y ?)
+
+	; Left arm is NOT free
+	(arm_info (side left) (grabbing ?obj&~nil))
+	; Cube is in left arm's reach
+	;(test (> ?y (- 0 ?*cube_side*)))
+	(test (> ?y 0))
+	; Cube is NOT in right arm's reach or right arm is also busy.
+	(not
+		(and
+			;(test (< ?y ?*cube_side*))
+			(test (< ?y 0))
+			(arm_info (side right) (grabbing nil))
+		)
+	)
+	(not (cubes_take_cube freeing_arm ?))
+	=>
+	(assert
+		(task (plan ?planName) (action_type cubes_put_cube) (params ?obj free)
+			(step 1 $?steps) (parent ?t))
+		(cubes_take_cube freeing_arm left)
+	)
+)
+
+(defrule cubes_take_cube-arm_busy-failed
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(children_status ?t failed)
+	(cubes_take_cube freeing_arm ?side)
+	(not (cubes_take_cube speaking_arm_busy))
+	(arm_info (side ?side) (grabbing ?obj))
+	=>
+	(assert
+		(task (plan ?planName) (action_type spg_say)
+			(params "I could not drop the object " ?obj ". I will try again.") (step 1 $?steps) (parent ?t))
+		(cubes_take_cube speaking_arm_busy)
+	)
+)
+
+(defrule cubes_take_cube-arm_busy-failed-finish
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(children_status ?t ?)
+	?f1 <-(cubes_take_cube freeing_arm ?)
+	?f2 <-(cubes_take_cube speaking_arm_busy)
+	=>
+	(retract ?f1 ?f2)
+	(assert
+		(task_status ?t failed)
+	)
+)
+
+(defrule cubes_take_cube-cube_not_found
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(not (arm_info (side right) (grabbing ?cube)))
+	(not (arm_info (side left) (grabbing ?cube)))
+	(not (cube ?cube $?))
+	(not (cubes_take_cube speaking_not_found))
+	=>
+	(assert
+		(task (plan ?planName) (action_type spg_say)
+			(params "I could not find the cube " ?cube ". I'll search again.") (step 1 $?steps) (parent ?t))
+		(cubes_take_cube speaking_not_found)
+	)
+)
+
+(defrule cubes_take_cube-cube_not_found-get_info
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	?f <-(cubes_take_cube speaking_not_found)
+	(children_status ?t ?)
+	=>
+	(retract ?f)
+	(assert
+		(task (plan ?planName) (action_type cubes_get_info) (step 1 $?steps) (parent ?t))
 	)
 )
 
 (defrule cubes_take_cube-send_right
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step ?step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -41,7 +159,7 @@
 	;(test (< ?y ?*cube_side*))
 	(test (< ?y 0))
 	; Right arm is free
-	(right_arm nil)
+	(arm_info (side right) (grabbing nil))
 	(not (waiting (symbol take_cube_right)))
 	(not (BB_answer "takexyz" take_cube_right ? ?))
 	(not (cubes_taking ?cube))
@@ -65,7 +183,7 @@
 	;(test (> ?y (- 0 ?*cube_side*)))
 	(test (> ?y 0))
 	; Left arm is free
-	(left_arm nil)
+	(arm_info (side left) (grabbing nil))
 	(not (waiting (symbol take_cube_left)))
 	(not (BB_answer "takexyz" take_cube_left ? ?))
 	(not (cubes_taking ?cube))
@@ -76,17 +194,36 @@
 	)
 )
 
-(defrule cubes_take_cube-error
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step ?step $?steps) (parent ?pt))
+(defrule cubes_take_cube-error-speak
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
 	(BB_answer "takexyz" ? 0 ?)
+	(not (cubes_take_cube speaking_take_failed))
 	=>
 	(assert
-		(task (plan ?planName) (action_type spg_say) (params "I couldn't take the cube " ?cube ". It's probably to far for me to get.")
-			(step (- ?step 1) $?steps) (parent ?pt))
+		(task (plan ?planName) (action_type spg_say)
+			(params "I couldn't take the cube " ?cube ". It's probably to far for me to get. I will try again.")
+			(step 1 $?steps) (parent ?t))
+		(cubes_take_cube speaking_take_failed)
+	)
+)
+
+(defrule cubes_take_cube-error-get_info
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	?f <-(cubes_taking ?)
+	?sp <-(cubes_take_cube speaking_take_failed)
+	(children_status ?t ?)
+	=>
+	(retract ?sp ?f)
+	(assert
+		(task (plan ?planName) (action_type cubes_get_info) (step 1 $?steps) (parent ?t))
 	)
 )
 
@@ -99,14 +236,12 @@
 	?s <-(stack $?stack ?cube)
 	(BB_answer "takexyz" take_cube_right 1 ?)
 
-	?a <-(right_arm nil)
+	?a <-(arm_info (side right) (grabbing nil))
 	=>
 	(retract ?a ?s)
 	(assert
 		(stack $?stack)
-		(right_arm ?cube)
-		(task_status ?t successful)
-		;(task (plan ?planName) (action_type ra_goto) (params "navigation") (step 1 $?steps) (parent ?t))
+		(arm_info (side right) (grabbing ?cube) (position "custom"))
 	)
 )
 
@@ -119,21 +254,19 @@
 	?s <-(stack $?stack ?cube)
 	(BB_answer "takexyz" take_cube_left 1 ?)
 
-	?a <-(left_arm nil)
+	?a <-(arm_info (side left) (grabbing nil))
 	=>
 	(retract ?a ?s)
 	(assert
 		(stack $?stack)
-		(left_arm ?cube)
-		(task_status ?t successful)
-		;(task (plan ?planName) (action_type la_goto) (params "navigation") (step 1 $?steps) (parent ?t))
+		(arm_info (side left) (grabbing ?cube) (position "custom"))
 	)
 )
 
 ;			CLEAN UP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defrule cubes_take_cube-clean_flag
+(defrule cubes_take_cube-clean_taking
 	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps) (parent ?pt))
 	(active_task ?t)
 	(task_status ?t ?)
@@ -142,4 +275,15 @@
 	?ct <-(cubes_taking ?)
 	=>
 	(retract ?ct)
+)
+
+(defrule cubes_take_cube-clean_freeing_arms
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps) (parent ?pt))
+	(active_task ?t)
+	(task_status ?t ?)
+	(not (cancel_active_tasks))
+
+	?f <-(cubes_take_cube freeing_arm ?)
+	=>
+	(retract ?f)
 )

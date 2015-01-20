@@ -4,9 +4,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; These couple of rules should not be necessary, and won't work with the current code.
-; They are included in case the CLIPS source is fixed and add robustness in
-; that case.
+; These couple of rules should not be necessary.
 
 (defrule delete_task_status
 	(declare (salience 9800))
@@ -24,6 +22,14 @@
 	=>
 	(retract ?at)
 	(log-message INFO "Deleted orphan active_task.")
+)
+
+(defrule delete_children_status
+	(declare (salience -9800))
+	?cs <-(children_status ? ?)
+	=>
+	(retract ?cs)
+	(log-message INFO "Deleted children_status.")
 )
 
 ; DELETE CHILDREN PLANS
@@ -59,6 +65,20 @@
 	(retract ?dct ?task)
 )
 
+; DELETE CHILDREN STATUS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; When a task has a task_status and its parent has a children_status, it is from a previous execution.
+; i. e. it should be deleted.
+
+(defrule delete_old_children_status
+	(declare (salience 9800))
+	(task (id ?t) (parent ?pt))
+	(task_status ?t ?)
+	?cs <-(children_status ?pt ?)
+	=>
+	(retract ?cs)
+)
+
 ; SUCCESSFUL PLANS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; When a task was successful, the planner must delete all tasks up to some point where it can continue the execution of the plan.
@@ -78,7 +98,7 @@
 	(log-message INFO "Successful task of plan '" ?planName "' with action_type: '" ?action_type "' and params: '" $?params "' was deleted. Other tasks of same hierarchy (unordered or successors) exist.")
 )
 
-(defrule successful_task-make_parent_successful ; When there are no tasks with same hierarchy (unordered or successors), make parent task active (and successful)
+(defrule successful_task-mark_children_successful ; When there are no tasks with same hierarchy (unordered or successors), mark exeuction as successful (so the parent task can decide whether to decompose again or mark itself as successful)
 	(declare (salience -9500))
 	(task (id ?pt) (params $?params_PP) (action_type ?action_type_PP))
 	?task <-(task (id ?t) (plan ?planName) (step ?step $?steps) (params $?params) (action_type ?action_type) (parent ?pt))
@@ -91,10 +111,10 @@
 	=>
 	(retract ?ts ?at ?task)
 	(assert
-		(task_status ?pt successful)
+		(children_status ?pt successful)
 		(active_task ?pt)
 	)
-	(log-message INFO "Successful task of plan '" ?planName "' with action_type: '" ?action_type "' and params: '" $?params "' was deleted with no other tasks of same hierarchy. Parent task with action_type: '" ?action_type_PP "' and params: '" $?params_PP "' is now active (and successful).")
+	(log-message INFO "Successful task of plan '" ?planName "' with action_type: '" ?action_type "' and params: '" $?params "' was deleted with no other tasks of same hierarchy. Parent task with action_type: '" ?action_type_PP "' and params: '" $?params_PP "' is now active.")
 )
 
 (defrule successful_task-top_level_succeeded ; LAST Top-level task for this plan was successful
@@ -116,11 +136,28 @@
 )
 
 ; Salience should prevent the previous rule to catch this action_type, but for redundancy and a more elegant design, action_type is validated.
-(defrule successful_task-catch_successful_task ; When a top-level task succeeeds, a task to say that it succeeded and to later delete the plan is asserted, this rule is to catch the "success" plan so it won't create a loop and error.
+(defrule successful_task-catch_successful_task ; When a top-level task succeeeds, a task to say that it succeeded and to later delete the plan is asserted, this rule is to catch the "success" plan so it won't create a loop.
 	?task <-(task (id ?t) (step ?) (action_type PE-success))
 	?at <-(active_task ?t)
 	=>
 	(retract ?at ?task)
+)
+
+(defrule successful-task-mark_task_without_rules_as_successful ; If no rules are enabled, mark as successful IF children_status is successful.
+	(declare (salience -9500))
+	(task (id ?t) (plan ?planName) (step $?steps) (action_type ?action_type) (params $?params)) ; see next rule
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (waiting))
+	(not (timer_sent $?))
+	(not (PE-failed ?))
+	?cs <-(children_status ?t successful)
+	=>
+	(assert
+		(task_status ?t successful)
+	)
+	(log-message INFO "Task " ?t " succeeded with no enabled rules. (children_status successfull)")
+	(log-message INFO "Task " ?t ": " ?planName " - " ?action_type " - " $?params)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -140,28 +177,44 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; When a leaf node was unsuccessful, the planner must delete all tasks up to some point where it can (retask and) manage to accomplish the plan.
 
-(defrule failed_task-mark_task_without_rules_as_failed-set_failure_task ; When a task has no rules (either to assert new sub-tasks or perform an action) it is either an incomplete design or (most likely) a task set to re-plan but with no more alternatives, which should be marked as failed.
+(defrule failed_task-mark_task_without_rules_as_failed-set_failure_task-no_children_status ; When a task has no enabled rules (either to assert new sub-tasks or perform an action) it is either an incomplete design or (most likely) a task set to re-plan but with no more alternatives, which should be marked as failed.
 	(declare (salience -9500))
 	(task (id ?t) (plan ?planName) (step $?steps) (action_type ?action_type&~PE-fail) (params $?params)) ; see next rule
 	(active_task ?t)
+	(not (task_status ?t ?))
 	(not (waiting))
 	(not (timer_sent $?))
-	(not (task_status ?t ?))
 	(not (PE-failed ?))
+	(not (children_status ?t ?))
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say) (params "I don't know how to perform action:" ?action_type ".") (step 1 $?steps) (parent ?t))
 		(task (plan ?planName) (action_type PE-fail) (params "") (step 2 $?steps) (parent ?t))
 		(PE-failed ?t)
 	)
-	(log-message INFO "Task " ?t " failed. (No executable rules).")
-	(log-message INFO "Task " ?t ": " ?planName " - " ?action_type " - " $?params)
-	(stop)
+)
+
+(defrule failed_task-mark_task_without_rules_as_failed-set_failure_task-children_status ; When a task has no enabled rules (either to assert new sub-tasks or perform an action) it is either an incomplete design or (most likely) a task set to re-plan but with no more alternatives, which should be marked as failed.
+	(declare (salience -9500))
+	(task (id ?t) (plan ?planName) (step $?steps) (action_type ?action_type&~PE-fail) (params $?params)) ; see next rule
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (waiting))
+	(not (timer_sent $?))
+	(not (PE-failed ?))
+	?cs <-(children_status ?t failed)
+	=>
+	(retract ?cs)
+	(assert
+		(task (plan ?planName) (action_type spg_say) (params "I don't know how to perform action:" ?action_type ".") (step 1 $?steps) (parent ?t))
+		(task (plan ?planName) (action_type PE-fail) (params "") (step 2 $?steps) (parent ?t))
+		(PE-failed ?t)
+	)
 )
 
 (defrule failed_task-mark_task_without_rules_as_failed-after_failure_task
 	(declare (salience -9500))
-	(task (id ?t) (plan ?planName) (step $?steps) (action_type ?action_type&~PE-fail)) ; see next rule
+	(task (id ?t) (plan ?planName) (step $?steps) (params $?params) (action_type ?action_type&~PE-fail)) ; see next rule
 	(active_task ?t)
 	(not (waiting))
 	(not (timer_sent $?))
@@ -172,7 +225,9 @@
 	(assert
 		(task_status ?t failed)
 	)
-	(log-message WARNING "No alternatives left to perform action " ?action_type)
+	(log-message INFO "Task " ?t " failed. (No executable rules).")
+	(log-message INFO "Task " ?t ": " ?planName " - " ?action_type " - " (implode$ $?params))
+	(stop)
 )
 
 (defrule failed_task-mark_task_without_rules_as_failed-delete_orphan_failed_facts
@@ -208,18 +263,23 @@
 	(log-message WARNING "Plan '" ?action_type "' with steps: '" ?step " " $?steps "' failed. Deleted same hierarchy task for plan '" ?planName "' with action_type: '" ?action_type2 "' and params: '" $?params2 "'.")
 )
 
-(defrule failed_task-delete_failed_task ; After removing all other same-hierarchy tasks, remove this task and let the engine replan. (this rule applies to non-top-level tasks)
+(defrule failed_task-delete_failed_task-mark_children_status ; After removing all other same-hierarchy tasks, remove this task, set children_status as failed, activate parent task and let the engine replan. (this rule applies to non-top-level tasks)
 	(declare (salience -9500))
-	?task <-(task (id ?t) (plan ?planName) (step ?step ?next_step $?steps) (params $?params) (action_type ?action_type))
+	(task (id ?pt) (params $?params_PP) (action_type ?action_type_PP))
+	?task <-(task (id ?t) (plan ?planName) (step ?step $?steps) (params $?params) (action_type ?action_type) (parent ?pt))
+	?at <-(active_task ?t)
 	?ts <-(task_status ?t failed)
 	(not (task (parent ?t)))
-	?at <-(active_task ?t)
 	(not
-		(task (id ~?t) (plan ?planName) (step ? ?next_step $?steps) )
+		(task (id ~?t) (plan ?planName) (step ? $?steps) )
 	)
 	=>
 	(retract ?ts ?at ?task)
-	(log-message WARNING "Failed task of plan '" ?planName "' with action_type: '" ?action_type "' and params: '" $?params "' was deleted. Parent task should be activated for replanning.")
+	(assert
+		(children_status ?pt failed)
+		(active_task ?pt)
+	)
+	(log-message WARNING "Failed task of plan '" ?planName "' with action_type: '" ?action_type "' and params: '" $?params "' was deleted. Parent task activated for replanning.")
 )
 
 (defrule failed_task-top_level_failed ; After removing all other same-hierarchy tasks, remove this task.

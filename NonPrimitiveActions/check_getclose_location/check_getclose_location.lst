@@ -1,6 +1,5 @@
 check_getclose_location.clp
 ../../PrimitiveActions/check_module_is_connected.lst
 ../../PrimitiveActions/check_location_exists.lst
-../../PrimitiveActions/spg_say.lst
 ../../PrimitiveActions/wait_user_start_module.lst
 ../../PrimitiveActions/wait_user_set_location.lst
