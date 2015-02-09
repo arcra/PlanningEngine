@@ -1,0 +1,5 @@
+check_getclose_location.clp
+../check_module_is_connected/check_module_is_connected.lst
+../check_location_exists/check_location_exists.lst
+../wait_user_start_module/wait_user_start_module.lst
+../wait_user_set_location/wait_user_set_location.lst

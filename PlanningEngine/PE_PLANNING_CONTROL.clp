@@ -7,18 +7,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;					IMPORTANT NOTES (TO UNDERSTAND)
-; - Only one top-level task (for each plan) is decomposed in smaller tasks
-;	at a time. (Only one path from the root node to a lead node
-;	of the task search tree)
+; - Only one branch of each plan is decomposed at a time.
 ;	i. e. The whole task is not "expanded" from the start.
-;	UNLESS different steps can run in parallel.
-
+;	UNLESS tasks in different branches can run in parallel.
 ; - A task fact can have an enabled_task fact or an active_task fact, but
 ;	not both.
 ; - Only the most detailed tasks (so far) (i. e. leaf nodes)
 ;	are either enabled or active. (i. e. parent tasks cannot be enabled,
 ;	and thus, cannot be discarded when activating tasks)
-;
 ; - task_priority is a number. When two tasks are compared and one of them
 ;	does not have a task_priority, ancestor's priorities will be used.
 ;	(Check selecting and task comparing algorithms)
@@ -29,7 +25,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule NOT_allTasksEnabled-retract_higher_hierarchy_tasks
-	(declare (salience 9800))
+	(declare (salience 9900))
 
 	(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
@@ -37,25 +33,38 @@
 	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	?at <-(active_task ?t)
 	; There's another task of the same plan that should have been activated before this one.
+	; There's another task that is no parent of other task (is a leaf node)
 	(task (id ?t2) (plan ?planName) (step ?step2 $?steps2))
-	(test (neq ?t ?t2) )
-	(test
-		(or
-			(> (length$ $?steps2) (length$ $?steps1))
-			(and
-				(eq $?steps2 $?steps1)
-				(< ?step2 ?step1)
-			)
+	(not (active_task ?t2))
+	(not (task (parent ?t2)))
+	; There's no active "leaf node" task (from this or other plan)
+	; that cannot run in parallel with this one.
+	; i. e. This one can be activated
+	; (If it was the other case, this task was probably already discarded).
+	(not
+		(and
+			(task (id ?t3) (action_type ?action_type3))
+			(not (task (parent ?t3)))
+			(active_task ?t3)
+			(not (can_run_in_parallel ?action_type3 ?action_type2))
+			(not (can_run_in_parallel ?action_type2 ?action_type3))
 		)
 	)
-;	(not (can_run_in_parallel ?action_type1 ?action_type2))
-;	(not (can_run_in_parallel ?action_type2 ?action_type1))
+	; There's not another task of the same hierarchy with a step number lower than this.
+	; i. e. This one should be activated.
+	(not
+		(and
+			(task (id ?t3) (plan ?planName) (step ?step3 $?steps2))
+			(test (< ?step3 ?step2))
+		)
+	)
 	=>
 	(retract ?at)
+	(log-message INFO "Active task retracted: (task (id " ?t ") (plan \"" ?planName "\") (action_type " ?action_type1 ") (step " ?step1 " (implode$ $?steps1) ") (params " (implode$ $?params1) ") ) because of task: (task (id " ?t2 ") (action_type " ?action_type2 ") (step " ?step2 " (implode$ $?steps2) ") (params " (implode$ $?params2) ") )")
 )
 
 (defrule NOT_allTasksEnabled-start_canceling
-	(declare (salience 9700))
+	(declare (salience 9850))
 
 	(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
@@ -67,13 +76,8 @@
 	(not (can_run_in_parallel ?action_type1 ?action_type2))
 	(not (can_run_in_parallel ?action_type2 ?action_type1))
 	(task_priority ?action_type2 ?x)
-	(or
-		(not (task_priority ?action_type1 ?))
-		(and
-			(task_priority ?action_type1 ?y)
-			(test (> ?x ?y))
-		)
-	)
+	(task_priority ?action_type1 ?y)
+	(test (> ?x ?y))
 	=>
 	(assert
 		(cancel_active_tasks)
@@ -81,7 +85,7 @@
 )
 
 (defrule NOT_allTasksEnabled-start_planning
-	(declare (salience 9500))
+	(declare (salience 9800))
 
 	?ate <-(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
@@ -95,15 +99,29 @@
 	; HOWEVER, maybe the cancelation rules should handle the status of the execution
 	; So it wouldn't depend on the children_status facts.
 	(not (children_status $?))
+	; There's a task taht is not active and has no children tasks.
 	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	(not (active_task ?t))
-	; There's no active task that cannot run in parallel with this one.
+	(not (task (parent ?t)))
+	; There's no active "leaf node" task (from this or other plan)
+	; that cannot run in parallel with this one.
+	; i. e. This one can be activated
+	; (If it was the other case, this task was probably already discarded).
 	(not
 		(and
 			(task (id ?t2) (action_type ?action_type2))
+			(not (task (parent ?t2)))
 			(active_task ?t2)
 			(not (can_run_in_parallel ?action_type1 ?action_type2))
 			(not (can_run_in_parallel ?action_type2 ?action_type1))
+		)
+	)
+	; There's not another task of the same hierarchy with a step number lower than this.
+	; i. e. This one should be activated.
+	(not
+		(and
+			(task (id ?t2) (plan ?planName) (step ?step2 $?steps1))
+			(test (< ?step2 ?step1))
 		)
 	)
 	=>
@@ -111,7 +129,7 @@
 )
 
 (defrule retract_active_tasks
-	(declare (salience -9800))
+	(declare (salience -9900))
 	(cancel_active_tasks)
 	?at <-(active_task ?)
 	=>
@@ -163,21 +181,26 @@
 	(task (id ?t) (plan ?planName) (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
 	(not (PE-enabled_task ?t))
 	(not (active_task ?t))
+	(not (task (parent ?t)))
+	; There's no active "leaf node" task (from this or other plan)
+	; that cannot run in parallel with this one.
+	; i. e. This one can be activated
+	; (If it was the other case, this task was probably already discarded).
 	(not
 		(and
-			(task (id ?t2) (step ?step2 $?steps2))
-			(test (neq ?t ?t2) )
-			(test
-				(or
-					(> (length$ $?steps2) (length$ $?steps1))
-					(and
-						(eq $?steps2 $?steps1)
-						(< ?step2 ?step1)
-					)
-				)
-			)
-;			(not (can_run_in_parallel ?action_type1 ?action_type2))
-;			(not (can_run_in_parallel ?action_type2 ?action_type1))
+			(task (id ?t2) (action_type ?action_type2))
+			(not (task (parent ?t2)))
+			(active_task ?t2)
+			(not (can_run_in_parallel ?action_type1 ?action_type2))
+			(not (can_run_in_parallel ?action_type2 ?action_type1))
+		)
+	)
+	; There's not another task of the same hierarchy with a step number lower than this.
+	; i. e. This one should be activated.
+	(not
+		(and
+			(task (id ?t2) (plan ?planName) (step ?step2 $?steps1))
+			(test (< ?step2 ?step1))
 		)
 	)
 	=>
@@ -194,21 +217,23 @@
 			(task (id ?t) (plan ?planName) (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
 			(not (PE-enabled_task ?t))
 			(not (active_task ?t))
+			(not (task (parent ?t)))
+			; There's no active task that cannot run in parallel with this one.
+			; i. e. This one cannot be activated (It probably was already discarded).
 			(not
 				(and
-					(task (id ?t2) (step ?step2 $?steps2))
-					(test (neq ?t ?t2) )
-					(test
-						(or
-							(> (length$ $?steps2) (length$ $?steps1))
-							(and
-								(eq $?steps2 $?steps1)
-								(< ?step2 ?step1)
-							)
-						)
-					)
-;					(not (can_run_in_parallel ?action_type1 ?action_type2))
-;					(not (can_run_in_parallel ?action_type2 ?action_type1))
+					(task (id ?t2) (action_type ?action_type2))
+					(active_task ?t2)
+					(not (can_run_in_parallel ?action_type1 ?action_type2))
+					(not (can_run_in_parallel ?action_type2 ?action_type1))
+				)
+			)
+			; There's not another task of the same hierarchy with a step number lower than this.
+			; i. e. This one should be activated.
+			(not
+				(and
+					(task (id ?t2) (plan ?planName) (step ?step2 $?steps1))
+					(test (< ?step2 ?step1))
 				)
 			)
 		)
@@ -678,14 +703,14 @@
 	)
 	?ats <-(PE-activable_tasks ?at $?tasks)
 	?lt <-(PE-logged_tasks $?logged)
-	(task (id ?at) (plan ?planName) (action_type ?action_type) (params $?params))
+	(task (id ?at) (plan ?planName) (action_type ?action_type) (step $?steps) (params $?params))
 	=>
 	(retract ?lt ?ats)
 	(assert
 		(PE-logged_tasks $?logged ?at)
 		(PE-activable_tasks $?tasks)
 	)
-	(log-message INFO "Task activated (" ?at "): " ?planName " - " ?action_type " - " $?params)
+	(log-message INFO "Task activated: (task (id " ?at ") (plan \"" ?planName "\") (action_type " ?action_type ") (step " (implode$ $?steps) ") (params " (implode$ $?params) ") )")
 )
 
 (defrule set_task_active-search_parallel_tasks-stop_logging

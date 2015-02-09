@@ -1,6 +1,0 @@
-cubes_do_cubes.clp
-../cubes_get_info/cubes_get_info.lst
-../cubes_stack_cubes/cubes_stack_cubes.lst
-../cubes_clear_arm/cubes_clear_arm.lst
-../arms_goto/arms_goto.lst
-../../PrimitiveActions/spg_say.lst

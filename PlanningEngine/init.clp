@@ -19,10 +19,11 @@
 
 (deffacts PE-init_facts
     (PE-last_plan nil)
-    (arm_info (side left))
+    (arm_info (side left) (enabled FALSE))
     (arm_info (side right))
 )
 
 (deffacts PE-settings
     (can_run_in_parallel la_goto ra_goto)
+    (can_run_in_parallel subscribe_to_shared_var subscribe_to_shared_var)
 )

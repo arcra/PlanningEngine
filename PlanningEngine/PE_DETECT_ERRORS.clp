@@ -2,10 +2,43 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;						ERROR DETECTION RULES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; To detect errors in plan design, not run-time errors.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defrule DETECT_ERROR-REPEATED_PRIORITIES
+	(declare (salience 10000))
+	(task_priority ?action_type ?priority1)
+	(task_priority ?action_type ~?priority1)
+	=>
+;	(log-message ERROR "REPEATED PRIORITIES!" "\n"
+;		"\t\tAction type: " ?action_type "\n"
+;	)
+	(printout t "ERROR: REPEATED PRIORITIES!" crlf
+		tab tab "Action type: " ?action_type crlf
+	)
+	(halt)
+)
 
+(defrule DETECT_ERROR-CHLIDREN_TASK_WITHOUT_PARENT_TASK ; By design of the planning engine, this should never happen!
+	(declare (salience 10000))
+	(task (id ?t) (plan ?planName) (action_type ?action_type) (params $?params) (parent ?pt&~nil))
+	(not (task (id ?pt)))
+	=>
+;	(log-message ERROR "TASK STATUS W/O ACTIVE TASK!" "\n"
+;		"\t\tPlan: " ?planName "\n"
+;		"\t\tAction type: " ?action_type "\n"
+;		"\t\tParams" $?params "\n"
+;	)
+	(printout t "ERROR: TASK W/O PARENT TASK!" crlf
+		tab tab "Plan: " ?planName crlf
+		tab tab "Action type: " ?action_type crlf
+		tab tab "Params" $?params crlf
+	)
+	(halt)
+)
+
+
+; I think there are cases in which cycled plans are ok. Although they should be handled with care.
+; That's why I commented out this rule:
 
 ;(defrule DETECT_ERROR-CYCLED_PLAN ; This should be prevented before execution, but just in case.
 ;	(declare (salience 10000))
@@ -35,26 +68,31 @@
 ;	(halt)
 ;)
 
-(defrule DETECT_ERROR-TASK_STATUS_WITHOUT_ACTIVE_TASK ; By design of the planning engine, this should never happen!
-	(declare (salience 10000))
-	(task (id ?t) (plan ?planName) (action_type ?action_type) (params $?params) (step $?steps))
-	(task_status ?t ?)
-	(not (active_task ?t))
-	=>
+; If there are tasks that "accomplish" or "cancels" other tasks, this might be useful.
+; That's why I commented out this rule:
+
+;(defrule DETECT_ERROR-TASK_STATUS_WITHOUT_ACTIVE_TASK ; By design of the planning engine, this should never happen!
+;	(declare (salience 10000))
+;	(task (id ?t) (plan ?planName) (action_type ?action_type) (params $?params) (step $?steps))
+;	(task_status ?t ?)
+;	(not (active_task ?t))
+;	=>
 ;	(log-message ERROR "TASK STATUS W/O ACTIVE TASK!" "\n"
 ;		"\t\tPlan: " ?planName "\n"
 ;		"\t\tAction type: " ?action_type "\n"
 ;		"\t\tParams" $?params "\n"
 ;	)
-	(printout t "ERROR: TASK STATUS W/O ACTIVE TASK!" crlf
-		tab tab "Plan: " ?planName crlf
-		tab tab "Action type: " ?action_type crlf
-		tab tab "Params" $?params crlf
-	)
-	(halt)
-)
+;	(printout t "ERROR: TASK STATUS W/O ACTIVE TASK!" crlf
+;		tab tab "Plan: " ?planName crlf
+;		tab tab "Action type: " ?action_type crlf
+;		tab tab "Params" $?params crlf
+;	)
+;	(halt)
+;)
 
 ; Priorities CAN be cycled, because transitivity is not a requisite
+; That's why I commented out this rule:
+
 ;(defrule DETECT_ERROR-CYCLED_PRIORITIES
 ;	(declare (salience 10000))
 ;	(task_priority ?action_type1 ?priority1)
@@ -76,17 +114,3 @@
 ;	)
 ;	(halt)
 ;)
-
-(defrule DETECT_ERROR-REPEATED_PRIORITIES
-	(declare (salience 10000))
-	(task_priority ?action_type ?priority1)
-	(task_priority ?action_type ~?priority1)
-	=>
-;	(log-message ERROR "REPEATED PRIORITIES!" "\n"
-;		"\t\tAction type: " ?action_type "\n"
-;	)
-	(printout t "ERROR: REPEATED PRIORITIES!" crlf
-		tab tab "Action type: " ?action_type crlf
-	)
-	(halt)
-)
