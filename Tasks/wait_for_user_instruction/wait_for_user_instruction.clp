@@ -169,12 +169,13 @@
 
 	(wait_for_user_instruction speech_sent)
 	?f <-(wait_for_user_instruction executing)
-	(children_status ?t successful)
+	(children_status ?t ?)
 	=>
 	(retract ?f)
 	(assert
 		(task (plan ?planName) (action_type spg_say) (params "Let me know if you want me to do something else.") (step 1 $?steps) (parent ?t))
 	)
+	(setTimer 20000 wait_for_user_instruction_speech)
 )
 
 (defrule wait_for_user_instruction-task_dismissed
@@ -231,7 +232,7 @@
 	(assert
 		(wait_for_user_instruction speech_sent)
 	)
-	(setTimer 10000 wait_for_user_instruction_speech)
+	(setTimer 20000 wait_for_user_instruction_speech)
 )
 
 (defrule wait_for_user_instruction-send_speech
@@ -263,10 +264,10 @@
 	(wait_for_user_instruction speech_sent)
 	=>
 	(retract ?f)
-	(setTimer 10000 wait_for_user_instruction_speech)
+	(setTimer 20000 wait_for_user_instruction_speech)
 )
 
-(defrule wait_for_user_instruction-response_received-try_again-speech
+(defrule wait_for_user_instruction-response_received-try_again-speech-no_timer
 	(task (id ?t) (plan ?planName) (action_type wait_for_user_instruction) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
@@ -275,8 +276,27 @@
 	(wait_for_user_instruction speech_sent)
 	(not (BB_sv_updated "recognizedSpeech" ?count ?speech ? $?recognized))
 	?f <-(BB_answer "process_string" parse_instruction 1 "try_again")
+	(not (timer_sent wait_for_user_instruction_speech))
 	=>
 	(retract ?f)
+	(assert
+		(task (plan ?planName) (action_type spg_say) (params "I could not understand, please repeat the instruction.") (step 1 $?steps) (parent ?t))
+		(wait_for_user_instruction speaking)
+	)
+)
+
+(defrule wait_for_user_instruction-response_received-try_again-speech-reset_timer
+	(task (id ?t) (plan ?planName) (action_type wait_for_user_instruction) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (canceling_active_tasks))
+
+	(wait_for_user_instruction speech_sent)
+	(not (BB_sv_updated "recognizedSpeech" ?count ?speech ? $?recognized))
+	?f <-(BB_answer "process_string" parse_instruction 1 "try_again")
+	?ts <-(timer_sent wait_for_user_instruction_speech)
+	=>
+	(retract ?f ?ts)
 	(assert
 		(task (plan ?planName) (action_type spg_say) (params "I could not understand, please repeat the instruction.") (step 1 $?steps) (parent ?t))
 		(wait_for_user_instruction speaking)

@@ -34,7 +34,7 @@
 	?at <-(active_task ?t)
 	; There's another task of the same plan that should have been activated before this one.
 	; There's another task that is no parent of other task (is a leaf node)
-	(task (id ?t2) (plan ?planName) (step ?step2 $?steps2))
+	(task (id ?t2) (plan ?planName) (action_type ?action_type2) (step ?step2 $?steps2) (params $?params2))
 	(not (active_task ?t2))
 	(not (task (parent ?t2)))
 	; There's no active "leaf node" task (from this or other plan)
@@ -60,7 +60,8 @@
 	)
 	=>
 	(retract ?at)
-	(log-message INFO "Active task retracted: (task (id " ?t ") (plan \"" ?planName "\") (action_type " ?action_type1 ") (step " ?step1 " (implode$ $?steps1) ") (params " (implode$ $?params1) ") ) because of task: (task (id " ?t2 ") (action_type " ?action_type2 ") (step " ?step2 " (implode$ $?steps2) ") (params " (implode$ $?params2) ") )")
+	(log-message INFO "Active task retracted: (task (id " ?t ") (plan \"" ?planName "\") (action_type " ?action_type1 ") (step " ?step1 " " (implode$ $?steps1) ") (params " (implode$ $?params1) ") ) because of task: (task (id " ?t2 ") (action_type " ?action_type2 ") (step " ?step2 " " (implode$ $?steps2) ") (params " (implode$ $?params2) ") )"
+	)
 )
 
 (defrule NOT_allTasksEnabled-start_canceling

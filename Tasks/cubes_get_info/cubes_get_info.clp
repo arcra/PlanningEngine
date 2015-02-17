@@ -15,7 +15,7 @@
 	)
 )
 
-(defrule cubes_get_info-send_arms_to_navigation
+(defrule cubes_get_info-arms_goto-navigation
 	(task (id ?t) (plan ?planName) (action_type cubes_get_info) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
@@ -42,7 +42,7 @@
 	(not (cube $?))
 	(not (cubes_get_info getting_info))
 	=>
-	(send-command "detectcubes" detect_cubes "all" 10000)
+	(send-command "detectcubes" detect_cubes "all" 20000)
 	(assert
 		(cubes_get_info getting_info)
 	)
@@ -70,9 +70,7 @@
 (defrule cubes_get_info-cubes_get_info
 	(task (id ?t) (plan ?planName) (action_type cubes_get_info))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
 	(not (cubes_info $?))
@@ -90,9 +88,7 @@
 (defrule cubes_get_info-create_cube
 	(task (id ?t) (plan ?planName) (action_type cubes_get_info))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
 	?ci <-(cubes_info ?name ?x ?y ?z $?cubes_info)
@@ -103,8 +99,9 @@
 		(bind ?offset (/ (* ?y -0.04) -0.45))
 	)
 	(assert
-		(cube (sym-cat ?name _cube) (- ?x 0.06) (+ ?y ?offset) (- ?z 0.06))
-		;(cube ?name (- ?x 0.03) ?y ?z)
+		(cube (sym-cat ?name _cube) ?x (+ ?y ?offset) (- ?z 0.06))
+;		(cube (sym-cat ?name _cube) ?x ?y (- ?z 0.06))
+;		(cube (sym-cat ?name _cube) ?x ?y ?z)
 		(cubes_info $?cubes_info)
 	)
 )
@@ -112,10 +109,9 @@
 (defrule cubes_get_info-delete_cubes_info
 	(task (id ?t) (plan ?planName) (action_type cubes_get_info))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
+
 	?ci <-(cubes_info )
 	=>
 	(retract ?ci)
@@ -124,9 +120,7 @@
 (defrule cubes_get_info-start_building_stacks
 	(task (id ?t) (plan ?planName) (action_type cubes_get_info))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
 	(not (cubes_info $?))
@@ -154,9 +148,7 @@
 (defrule cubes_get_info-keep_building_stacks
 	(task (id ?t) (plan ?planName) (action_type cubes_get_info))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
 	(not (cubes_info $?))
@@ -198,9 +190,7 @@
 (defrule cubes_get_info-stop_building_stacks
 	(task (id ?t) (plan ?planName) (action_type cubes_get_info))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
 	(not (cubes_info $?))

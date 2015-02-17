@@ -23,7 +23,6 @@
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
-	(not (arm_info (grabbing ?cube)))
 	?f <-(cubes_put_cube verifying)
 	=>
 	(retract ?f)
@@ -46,7 +45,7 @@
 	(retract ?ts)
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I cannot see the cube " ?cube ". I think I dropped it to the floor.")
+			(params "I cannot see the " ?cube ". I think I dropped it to the floor.")
 			(step 1 $?steps) (parent ?t))
 	)
 )
@@ -66,7 +65,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I cannot see the cube " ?cube ". I will look for it.")
+			(params "I cannot see the " ?cube ". I will look for it.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_put_cube searching_cube)
 	)
@@ -157,7 +156,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not drop the cube " ?cube ". I probably can't reach that place. I will try again.")
+			(params "I could not drop the " ?cube ". I probably can't reach that place. I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_put_cube speech_fail_drop)
 	)
@@ -193,7 +192,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not find a free space where to put cube" ?cube ". I will try again.")
+			(params "I could not find a free space where to put " ?cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_put_cube free_space_failed)
 	)
@@ -267,7 +266,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not find a free space where to put cube" ?cube ". I will try again.")
+			(params "I could not find a free space where to put " ?cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_put_cube free_space_failed)
 	)
@@ -326,7 +325,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not find a free space where to put cube" ?cube ". I will try again.")
+			(params "I could not find a free space where to put " ?cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_put_cube free_space_failed)
 	)
@@ -539,7 +538,7 @@
 	(retract ?st)
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not stack the cube" ?cube " on top of cube " ?top_cube ". I will try again.")
+			(params "I could not stack the " ?cube " on top of  " ?top_cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
 	)
 )

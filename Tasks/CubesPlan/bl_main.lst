@@ -1,3 +1,8 @@
 ../../PlanningEngine/bootloader.lst
 init.clp
-cubes_plan.lst
+; cubes_plan.lst
+../hd_lookat/hd_lookat.lst
+../cubes_do_cubes/cubes_do_cubes.lst
+../subscribe_to_shared_var/subscribe_to_shared_var.lst
+../wait_for_user_instruction/wait_for_user_instruction.lst
+../spg_say/spg_say.lst

@@ -1,4 +1,4 @@
-(defglobal ?*side_offset* = 1.5)
+(defglobal ?*side_offset* = 1.8)
 (defglobal ?*mv_offset* = 2.0)
 
 (defrule cubes_find_free_space-right-start_finding

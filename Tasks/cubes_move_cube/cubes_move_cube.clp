@@ -42,6 +42,54 @@
 	)
 )
 
+(defrule cubes_move_cube-cube_not_found-speak
+	(declare (salience 1))
+	(task (id ?t) (plan ?planName) (action_type cubes_move_cube) (params ?cube ?) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(not (cube ?cube ? ? ?))
+	(not (arm_info (grabbing ?cube)))
+	(not (cubes_move_cube not_found-speaking))
+	=>
+	(assert
+		(task (plan ?planName) (action_type spg_say) (params "I don't know where " ?cube " is, I will look for it.") (step 1 $?steps) (parent ?t))
+		(cubes_move_cube not_found-speaking)
+	)
+)
+
+(defrule cubes_move_cube-top_cube_not_found-speak
+	(declare (salience 1))
+	(task (id ?t) (plan ?planName) (action_type cubes_move_cube) (params ? ?cube&~cubestable) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(not (cube ?cube ? ? ?))
+	(not (arm_info (grabbing ?cube)))
+	(not (cubes_move_cube not_found-speaking))
+	=>
+	(assert
+		(task (plan ?planName) (action_type spg_say) (params "I don't know where " ?cube " is, I will look for it.") (step 1 $?steps) (parent ?t))
+		(cubes_move_cube not_found-speaking)
+	)
+)
+
+(defrule cubes_move_cube-not_found-get_info
+	(declare (salience 1))
+	(task (id ?t) (plan ?planName) (action_type cubes_move_cube) (params ? ?) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	?f <-(cubes_move_cube not_found-speaking)
+	=>
+	(retract ?f)
+	(assert
+		(task (plan ?planName) (action_type cubes_get_info) (step 1 $?steps) (parent ?t))
+	)
+)
 
 ;		CUBESTABLE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -57,7 +105,7 @@
 	(not (cubes_move_cube speech_sent_move_cube))
 	=>
 	(assert
-		(task (plan ?planName) (action_type spg_say) (params "I will put cube " ?cube " on the table.")
+		(task (plan ?planName) (action_type spg_say) (params "I will put " ?cube " on the table.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_move_cube speaking_move_cube)
 	)
@@ -100,10 +148,7 @@
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
-	(or
-		(arm_info (side right) (grabbing ?cube))
-		(arm_info (side left) (grabbing ?cube))
-	)
+	(arm_info (grabbing ?cube))
 	(cubes_move_cube speech_sent_move_cube)
 	=>
 	(assert
@@ -125,7 +170,7 @@
 	(not (cubes_move_cube speech_sent_move_cube))
 	=>
 	(assert
-		(task (plan ?planName) (action_type spg_say) (params "I will move cube " ?cube " on top of cube " ?top_cube)
+		(task (plan ?planName) (action_type spg_say) (params "I will move " ?cube " on top of " ?top_cube)
 			(step 1 $?steps) (parent ?t))
 		(cubes_move_cube speaking_move_cube)
 	)
@@ -220,10 +265,7 @@
 	(stack $? ?top_cube)
 	(cube ?top_cube ? ?y ?)
 
-	(or
-		(arm_info (side right) (grabbing ?cube))
-		(arm_info (side left) (grabbing ?cube))
-	)
+	(arm_info (grabbing ?cube))
 
 	(not
 		(and
@@ -305,7 +347,7 @@
 	(retract ?ss)
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not take the cube " ?cube ". I will try again.") (step 1 $?steps) (parent ?t))
+			(params "I could not take the " ?cube ". I will try again.") (step 1 $?steps) (parent ?t))
 	)
 )
 

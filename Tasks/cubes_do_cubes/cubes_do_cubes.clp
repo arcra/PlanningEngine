@@ -25,21 +25,32 @@
 	(not (stack $?stack))
 	(not
 		(and
-			(cube ?name ? ? ?)
-			(member$ ?name $?stack)
-			(not
-				(or
-					(cube ?cube ? ? ?)
-					(arm_info (grabbing ?cube))
-				)
-			)
+			(cubes_goal $? ?cube $?)
+			(not (cube ?cube ? ? ?))
+			(not (arm_info (grabbing ?cube)))
 		)
 	)
+	(not (cubes_do_cubes getting_info))
 	(not (cubes_do_cubes info_ready))
 	=>
 	(assert
 		(cubes_do_cubes info_ready)
 	)
+)
+
+(defrule cubes_do_cubes-get_info-info_not_ready
+	(declare (salience 1))
+	(task (id ?t) (plan ?planName) (action_type cubes_do_cubes) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(cubes_goal $?stack1 ?cube $?stack2)
+	(not (cube ?cube ? ? ?))
+	(not (arm_info (grabbing ?cube)))
+	?f <-(cubes_do_cubes info_ready)
+	=>
+	(retract ?f)
 )
 
 (defrule cubes_do_cubes-get_info
@@ -51,7 +62,7 @@
 	(cubes_goal $?stack1 ?cube $?stack2)
 	(not (stack $?stack1 ?cube $?stack2))
 	(not (cube ?cube ? ? ?))
-	(not (arm_info (grabbing ?cube)) )
+	(not (arm_info (grabbing ?cube)))
 	(not (cubes_do_cubes getting_info))
 	(not (cubes_do_cubes info_ready))
 	=>
@@ -83,16 +94,12 @@
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
+	(cubes_goal $?stack1 ?cube $?stack2)
+	(not (stack $?stack1 ?cube $?stack2))
+	(not (cube ?cube ? ? ?))
+	(not (arm_info (grabbing ?cube)))
+	(not (cubes_do_cubes info_ready))
 	?f <-(cubes_do_cubes getting_info)
-	(cubes_goal $?stack)
-	(cube ?cube ? ? ?)
-	(member$ ?cube $?stack)
-	(not
-		(or
-			(cube ?cube ? ? ?)
-			(arm_info (grabbing ?cube))
-		)
-	)
 	=>
 	(retract ?f)
 	(assert
@@ -109,13 +116,16 @@
 	(not (cancel_active_tasks))
 
 	?f <-(cubes_do_cubes getting_info)
-	(stack $?)
+	(cubes_goal $?stack)
+	(not (stack $?stack))
 	(not
 		(and
 			(cubes_goal $? ?cube $?)
-			(not (cube ?cube $?))
+			(not (cube ?cube ? ? ?))
+			(not (arm_info (grabbing ?cube)))
 		)
 	)
+	(not (cubes_do_cubes info_ready))
 	=>
 	(retract ?f)
 	(assert
@@ -209,12 +219,9 @@
 	(task (id ?t) (plan ?planName) (action_type cubes_do_cubes) (step $?steps))
 	(active_task ?t)
 	?ts <-(task_status ?t successful)
+
 	(not (cubes_goal $?))
-	
-	(or
-		(arm_info (side right) (grabbing ~nil))
-		(arm_info (side left) (grabbing ~nil))
-	)
+	(arm_info (grabbing ~nil))
 	=>
 	(retract ?ts)
 	(assert

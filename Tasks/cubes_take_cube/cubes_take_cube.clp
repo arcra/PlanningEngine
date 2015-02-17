@@ -75,7 +75,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "My right arm is not enabled. I cannot take the cube " ?cube)
+			(params "I can't reach it with my left arm, and my right arm is disabled. I cannot take the " ?cube)
 			(step 1 $?steps) (parent ?t))
 		(cubes_take_cube speech_disabled)
 	)
@@ -125,7 +125,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "My left arm is not enabled. I cannot take the cube " ?cube)
+			(params "I can't reach it with my right arm, and my left arm is disabled. I cannot take the " ?cube)
 			(step 1 $?steps) (parent ?t))
 		(cubes_take_cube speech_disabled)
 	)
@@ -290,7 +290,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not drop the object " ?obj ". I will try again.") (step 1 $?steps) (parent ?t))
+			(params "I could not drop the " ?obj ". I will try again.") (step 1 $?steps) (parent ?t))
 		(cubes_take_cube speaking_arm_busy)
 	)
 )
@@ -324,7 +324,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I don't know where the cube " ?cube " is. I will search for it.") (step 1 $?steps) (parent ?t))
+			(params "I don't know where the " ?cube " is. I will search for it.") (step 1 $?steps) (parent ?t))
 		(cubes_take_cube speaking_not_found)
 	)
 )
@@ -341,6 +341,20 @@
 	(retract ?f)
 	(assert
 		(task (plan ?planName) (action_type cubes_get_info) (step 1 $?steps) (parent ?t))
+	)
+)
+
+(defrule cubes_take_cube-cube_not_free
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(stack $? ?cube $? ?top_cube)
+	=>
+	(assert
+		(task (plan ?planName) (action_type cubes_clear_cube)
+			(params ?cube) (step 1 $?steps) (parent ?t))
 	)
 )
 
@@ -483,7 +497,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I couldn't take the cube " ?cube ". It's probably to far for me to get. I will try again.")
+			(params "I couldn't take the " ?cube ". It's probably to far for me to get. I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_take_cube speaking_take_failed)
 	)

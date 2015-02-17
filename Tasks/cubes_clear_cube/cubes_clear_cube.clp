@@ -16,7 +16,7 @@
 ;			EXECUTING
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defrule cubes_clear_cube-speech
-	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -26,13 +26,13 @@
 	(not (cubes_clear_cube speaking))
 	=>
 	(assert
-		(task (plan ?planName) (action_type spg_say) (params "I will clear cube " ?cube) (step 1 $?steps) (parent ?t))
+		(task (plan ?planName) (action_type spg_say) (params "I will clear " ?cube) (step 1 $?steps) (parent ?t))
 		(cubes_clear_cube speaking)
 	)
 )
 
 (defrule cubes_clear_cube-speech-finished
-	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -47,8 +47,64 @@
 	)
 )
 
+(defrule cubes_clear_cube-not_found-speak-first
+	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(cubes_clear_cube speech_sent)
+	(not (stack $? ?cube $?))
+	(not (arm_info (grabbing ?cube)))
+	(not (cubes_clear_cube not_found-first_speech))
+
+	(not (cubes_clear_cube not_found-speaking))
+	=>
+	(assert
+		(task (plan ?planName) (action_type spg_say) (params "I don't know where the " ?cube " is. I will look for it.") (step 1 $?steps) (parent ?t))
+		(cubes_clear_cube not_found-first_speech)
+		(cubes_clear_cube not_found-speaking)
+	)
+)
+
+(defrule cubes_clear_cube-not_found-speak-later
+	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(cubes_clear_cube speech_sent)
+	(not (stack $? ?cube $?))
+	(not (arm_info (grabbing ?cube)))
+	(cubes_clear_cube not_found-first_speech)
+
+	(not (cubes_clear_cube not_found-speaking))
+	=>
+	(assert
+		(task (plan ?planName) (action_type spg_say) (params "I still don't know where the " ?cube " is. I will look for it again.") (step 1 $?steps) (parent ?t))
+		(cubes_clear_cube not_found-speaking)
+	)
+)
+
+(defrule cubes_clear_cube-not_found-get_info
+	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(cubes_clear_cube speech_sent)
+	(not (stack $? ?cube $?))
+	(not (arm_info (grabbing ?cube)))
+	?f <-(cubes_clear_cube not_found-speaking)
+	=>
+	(retract ?f)
+	(assert
+		(task (plan ?planName) (action_type cubes_get_info) (step 1 $?steps) (parent ?t))
+	)
+)
+
 (defrule cubes_clear_cube-take_cube
-	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -75,7 +131,7 @@
 	(not (cubes_clear_cube failed_speaking))
 	=>
 	(assert
-		(task (plan ?planName) (action_type spg_say) (params "I could not clear the cube " ?cube) (step 1 $?steps) (parent ?t))
+		(task (plan ?planName) (action_type spg_say) (params "I could not clear the " ?cube) (step 1 $?steps) (parent ?t))
 		(cubes_clear_cube failed_speaking)
 	)
 )
@@ -104,6 +160,16 @@
 	(task_status ?t ?)
 
 	?sp <-(cubes_clear_cube speech_sent)
+	=>
+	(retract ?sp)
+)
+
+(defrule cubes_clear_cube-clean_not_found_speech
+	(task (id ?t) (plan ?planName) (action_type cubes_clear_cube) (params ?cube))
+	(active_task ?t)
+	(task_status ?t ?)
+
+	?sp <-(cubes_clear_cube not_found-first_speech)
 	=>
 	(retract ?sp)
 )
