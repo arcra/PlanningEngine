@@ -1,5 +1,5 @@
 (defglobal ?*side_offset* = 1.8)
-(defglobal ?*mv_offset* = 2.0)
+(defglobal ?*mv_offset* = 2.3)
 
 (defrule cubes_find_free_space-right-start_finding
 	(task (id ?t) (plan ?planName) (action_type cubes_find_free_space) (params right) (step $?steps))

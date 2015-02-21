@@ -53,7 +53,6 @@
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
-	(cubes_clear_cube speech_sent)
 	(not (stack $? ?cube $?))
 	(not (arm_info (grabbing ?cube)))
 	(not (cubes_clear_cube not_found-first_speech))
@@ -73,7 +72,6 @@
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
-	(cubes_clear_cube speech_sent)
 	(not (stack $? ?cube $?))
 	(not (arm_info (grabbing ?cube)))
 	(cubes_clear_cube not_found-first_speech)
@@ -92,7 +90,6 @@
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
-	(cubes_clear_cube speech_sent)
 	(not (stack $? ?cube $?))
 	(not (arm_info (grabbing ?cube)))
 	?f <-(cubes_clear_cube not_found-speaking)

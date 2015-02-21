@@ -37,15 +37,14 @@
 (defrule cubes_put_cube-not_successful
 	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube $?) (step $?steps))
 	(active_task ?t)
-	?ts <-(task_status ?t ?)
+	(task_status ?t ?)
 
 	(not (arm_info (grabbing ?cube)))
 	(not (cube ?cube $?))
 	=>
-	(retract ?ts)
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I cannot see the " ?cube ". I think I dropped it to the floor.")
+			(params "I cannot see the " ?cube ". I think I might have dropped it to the floor.")
 			(step 1 $?steps) (parent ?t))
 	)
 )
@@ -192,7 +191,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not find a free space where to put " ?cube ". I will try again.")
+			(params "I could not find a free space where to put the " ?cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_put_cube free_space_failed)
 	)
@@ -266,7 +265,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not find a free space where to put " ?cube ". I will try again.")
+			(params "I could not find a free space where to put the " ?cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_put_cube free_space_failed)
 	)
@@ -325,7 +324,7 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not find a free space where to put " ?cube ". I will try again.")
+			(params "I could not find a free space where to put the " ?cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_put_cube free_space_failed)
 	)
@@ -379,7 +378,7 @@
 	)
 	=>
 	(retract ?ffs)
-	(send-command "dropxyz" stack_cube (str-cat "right " ?x " " ?y " " (+ ?z ?*cube_offset*)) 180000)
+	(send-command "dropxyz" stack_cube (str-cat "right " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
 	(assert
 		(stacking ?top_cube)
 	)
@@ -432,7 +431,7 @@
 	)
 	=>
 	(retract ?ffs)
-	(send-command "dropxyz" stack_cube (str-cat "left " ?x " " ?y " " (+ ?z ?*cube_offset*)) 180000)
+	(send-command "dropxyz" stack_cube (str-cat "left " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
 	(assert
 		(stacking ?top_cube)
 	)
@@ -449,7 +448,7 @@
 	(stack $?stack ?top_cube)
 	(cube ?top_cube ?x ?y ?z)
 	=>
-	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z ?*cube_offset*)) 180000)
+	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
 	(assert
 		(stacking ?top_cube)
 	)
@@ -468,7 +467,7 @@
 	(test (< ?y ?*cube_side*))
 	(test (> ?y (- 0 ?*cube_side*)))
 	=>
-	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z ?*cube_offset*)) 180000)
+	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
 	(assert
 		(stacking ?top_cube)
 	)
@@ -495,7 +494,7 @@
 		)
 	)
 	=>
-	(send-command "dropxyz" drop_free (str-cat ?side " " ?x " 0 " (- ?z 0.03)) 180000)
+	(send-command "dropxyz" drop_free (str-cat ?side " " ?x " 0 " ?z) 180000)
 	(bind ?fs
 		(assert
 			(cubes_free_space ?side ?x 0 ?z)
@@ -538,7 +537,7 @@
 	(retract ?st)
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I could not stack the " ?cube " on top of  " ?top_cube ". I will try again.")
+			(params "I could not stack the " ?cube " on top of the " ?top_cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
 	)
 )

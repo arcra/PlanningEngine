@@ -94,9 +94,9 @@
 	?ci <-(cubes_info ?name ?x ?y ?z $?cubes_info)
 	=>
 	(retract ?ci)
-	(bind ?offset (/ (* ?y 0.04) 0.45))
+	(bind ?offset (/ (* ?y 0.08) 0.45))
 	(if (< ?y 0) then
-		(bind ?offset (/ (* ?y -0.04) -0.45))
+		(bind ?offset (/ (* ?y -0.08) -0.45))
 	)
 	(assert
 		(cube (sym-cat ?name _cube) ?x (+ ?y ?offset) (- ?z 0.06))

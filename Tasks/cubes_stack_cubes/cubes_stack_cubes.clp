@@ -33,7 +33,7 @@
 )
 
 (defrule cubes_stack_cubes-next_goal_cube
-	(task (id ?t) (plan ?planName) (action_type cubes_stack_cubes) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_stack_cubes) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -46,5 +46,19 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type cubes_move_cube) (params ?cube ?top_cube) (step 1 $?steps) (parent ?t))
+	)
+)
+
+(defrule cubes_stack_cubes-clear_stack
+	(task (id ?t) (plan ?planName) (action_type cubes_stack_cubes) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(cubes_goal $?stack ?top_cube)
+	(stack $?stack ?top_cube ?next_cube $?)
+	=>
+	(assert
+		(task (plan ?planName) (action_type cubes_clear_cube) (params ?top_cube) (step 1 $?steps) (parent ?t))
 	)
 )
