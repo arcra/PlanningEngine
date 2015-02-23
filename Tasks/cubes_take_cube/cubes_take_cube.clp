@@ -2,7 +2,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule cubes_take_cube-successful-verify
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -17,7 +17,7 @@
 )
 
 (defrule cubes_take_cube-successful
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -35,7 +35,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule cubes_take_cube-not_successful
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	?ts <-(task_status ?t successful)
 	(not (cancel_active_tasks))
@@ -56,7 +56,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule cubes_take_cube-right_arm-disabled
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -82,7 +82,7 @@
 )
 
 (defrule cubes_take_cube-right_arm-disabled-fail
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -106,7 +106,7 @@
 )
 
 (defrule cubes_take_cube-left_arm-disabled
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -132,7 +132,7 @@
 )
 
 (defrule cubes_take_cube-left_arm-disabled-fail
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -155,8 +155,54 @@
 	)
 )
 
+(defrule cubes_take_cube-force_right-arm_busy
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params right ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(stack $? ?cube)
+	(cube ?cube ? ?y ?)
+
+	; Right arm is NOT free
+	(arm_info (side right) (grabbing ?obj&~nil))
+	; Cube is in right arm's reach
+	(test (< ?y ?*cube_side*))
+	;(test (< ?y 0))
+	(not (cubes_take_cube freeing_arm ?))
+	=>
+	(assert
+		(task (plan ?planName) (action_type cubes_put_cube) (params ?obj free)
+			(step 1 $?steps) (parent ?t))
+		(cubes_take_cube freeing_arm right)
+	)
+)
+
+(defrule cubes_take_cube-force_left-arm_busy
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params left ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(stack $? ?cube)
+	(cube ?cube ? ?y ?)
+
+	; Left arm is NOT free
+	(arm_info (side left) (grabbing ?obj&~nil))
+	; Cube is in left arm's reach
+	(test (> ?y (- 0 ?*cube_side*)))
+	;(test (> ?y 0))
+	(not (cubes_take_cube freeing_arm ?))
+	=>
+	(assert
+		(task (plan ?planName) (action_type cubes_put_cube) (params ?obj free)
+			(step 1 $?steps) (parent ?t))
+		(cubes_take_cube freeing_arm left)
+	)
+)
+
 (defrule cubes_take_cube-arm_busy-right
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params decide ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -217,7 +263,7 @@
 )
 
 (defrule cubes_take_cube-arm_busy-left
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params decide ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -278,7 +324,7 @@
 )
 
 (defrule cubes_take_cube-arm_busy-failed
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -296,7 +342,7 @@
 )
 
 (defrule cubes_take_cube-arm_busy-failed-finish
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -312,7 +358,7 @@
 )
 
 (defrule cubes_take_cube-cube_not_found
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -330,7 +376,7 @@
 )
 
 (defrule cubes_take_cube-cube_not_found-get_info
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -345,7 +391,7 @@
 )
 
 (defrule cubes_take_cube-cube_not_free
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -358,8 +404,57 @@
 	)
 )
 
+(defrule cubes_take_cube-force_right
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params right ?cube) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(stack $? ?cube)
+	(cube ?cube ?x ?y ?z)
+	; Cube is in right arm's reach
+	(test (< ?y ?*cube_side*))
+	;(test (< ?y 0))
+	; Right arm is free
+	(arm_info (side right) (grabbing nil) (enabled TRUE))
+
+	(not (waiting (symbol take_cube_right)))
+	(not (BB_answer "takexyz" take_cube_right ? ?))
+	(not (cubes_taking ?cube))
+	=>
+	(send-command "takexyz" take_cube_right (str-cat "right " ?x " " ?y " " (+ ?z ?*cube_side*)) 180000 2)
+	(assert
+		(cubes_taking ?cube)
+	)
+)
+
+(defrule cubes_take_cube-force_left
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params left ?cube) (step ?step $?steps) )
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	(stack $? ?cube)
+	(cube ?cube ?x ?y ?z)
+
+	; Cube is in left arm's reach
+	(test (> ?y (- 0 ?*cube_side*)))
+	;(test (> ?y 0))
+	; Left arm is free
+	(arm_info (side left) (grabbing nil) (enabled TRUE))
+
+	(not (waiting (symbol take_cube_left)))
+	(not (BB_answer "takexyz" take_cube_left ? ?))
+	(not (cubes_taking ?cube))
+	=>
+	(send-command "takexyz" take_cube_left (str-cat "left " ?x " " ?y " " (+ ?z ?*cube_side*)) 180000 2)
+	(assert
+		(cubes_taking ?cube)
+	)
+)
+
 (defrule cubes_take_cube-send_right
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params decide ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -416,14 +511,14 @@
 	(not (BB_answer "takexyz" take_cube_right ? ?))
 	(not (cubes_taking ?cube))
 	=>
-	(send-command "takexyz" take_cube_right (str-cat "right " ?x " " ?y " " (+ ?z ?*cube_side*)) 60000 2)
+	(send-command "takexyz" take_cube_right (str-cat "right " ?x " " ?y " " (+ ?z ?*cube_side*)) 180000 2)
 	(assert
 		(cubes_taking ?cube)
 	)
 )
 
 (defrule cubes_take_cube-send_left
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step ?step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params decide ?cube) (step ?step $?steps) )
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -480,14 +575,14 @@
 	(not (BB_answer "takexyz" take_cube_left ? ?))
 	(not (cubes_taking ?cube))
 	=>
-	(send-command "takexyz" take_cube_left (str-cat "left " ?x " " ?y " " (+ ?z ?*cube_side*)) 60000 2)
+	(send-command "takexyz" take_cube_left (str-cat "left " ?x " " ?y " " (+ ?z ?*cube_side*)) 180000 2)
 	(assert
 		(cubes_taking ?cube)
 	)
 )
 
 (defrule cubes_take_cube-error-speak
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -497,14 +592,14 @@
 	=>
 	(assert
 		(task (plan ?planName) (action_type spg_say)
-			(params "I couldn't take the " ?cube ". It's probably to far for me to get. I will try again.")
+			(params "I couldn't take the " ?cube ". It is probably too far for me to get. I will try again.")
 			(step 1 $?steps) (parent ?t))
 		(cubes_take_cube speaking_take_failed)
 	)
 )
 
 (defrule cubes_take_cube-error-get_info
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -520,7 +615,7 @@
 )
 
 (defrule cubes_take_cube-right_taken
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -538,7 +633,7 @@
 )
 
 (defrule cubes_take_cube-left_taken
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -559,7 +654,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrule cubes_take_cube-clean_taking
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps) (parent ?pt))
 	(active_task ?t)
 	(task_status ?t ?)
 	(not (cancel_active_tasks))
@@ -570,7 +665,7 @@
 )
 
 (defrule cubes_take_cube-clean_freeing_arms
-	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_take_cube) (params ? ?cube) (step $?steps) (parent ?pt))
 	(active_task ?t)
 	(task_status ?t ?)
 	(not (cancel_active_tasks))

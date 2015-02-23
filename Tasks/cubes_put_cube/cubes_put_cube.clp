@@ -49,6 +49,29 @@
 	)
 )
 
+;				CLEAN UP
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule cubes_put_cube-clean_up-free_space
+	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube $?) (step $?steps))
+	(active_task ?t)
+	(task_status ?t ?)
+
+	?f <-(cubes_free_space $?)
+	=>
+	(retract ?f)
+)
+
+(defrule cubes_put_cube-clean_up-dropping
+	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube $?) (step $?steps))
+	(active_task ?t)
+	(task_status ?t ?)
+
+	?f <-(dropping ?)
+	=>
+	(retract ?f)
+)
+
 ;		EXECUTING
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -123,7 +146,7 @@
 )
 
 (defrule cubes_put_cube-put_free-success
-	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube ?) (step ?step $?steps) (parent ?pt))
+	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube ?) (step ?step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
@@ -142,7 +165,7 @@
 )
 
 (defrule cubes_put_cube-put_free-fail-speech
-	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube free|cubestable)
+	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube free|cubestable|center)
 		(step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
@@ -162,7 +185,7 @@
 )
 
 (defrule cubes_put_cube-put_free-fail-get_info
-	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube free|cubestable)
+	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube free|cubestable|center)
 		(step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
@@ -447,6 +470,7 @@
 
 	(stack $?stack ?top_cube)
 	(cube ?top_cube ?x ?y ?z)
+	(not (stacking ?top_cube))
 	=>
 	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
 	(assert
@@ -480,21 +504,23 @@
 	(not (cancel_active_tasks))
 
 	(arm_info (side ?side) (grabbing ?cube))
+	(not (cubes_free_space $?))
 
 	; Get the ?x and ?z of any base cube.
-	(stack ?base)
+	(stack ?base $?)
 	(cube ?base ?x ? ?z)
 
 	(not
 		(and
 			(stack ?name $?)
-			(cube ?name ? ?y1 ?)
+			(cube ?name ?x1 ?y1 ?)
 			(test (< ?y1 ?*cube_side*))
 			(test (> ?y1 (- 0 ?*cube_side*)))
+			(test (< ?x1 0.35))
 		)
 	)
 	=>
-	(send-command "dropxyz" drop_free (str-cat ?side " " ?x " 0 " ?z) 180000)
+	(send-command "dropxyz" drop_free (str-cat ?side " " ?x " 0 " (+ ?z 0.03) ) 180000)
 	(bind ?fs
 		(assert
 			(cubes_free_space ?side ?x 0 ?z)
@@ -525,19 +551,35 @@
 	)
 )
 
-(defrule cubes_put_cube-stack-failed
+(defrule cubes_put_cube-stack-failed-speech
 	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube ~cubestable) (step $?steps))
 	(active_task ?t)
 	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
 
 	(BB_answer "dropxyz" stack_cube 0 ?)
-	?st <-(stacking ?top_cube)
+	(stacking ?top_cube)
+	(not (cubes_put_cube stack_failed-speaking))
 	=>
-	(retract ?st)
 	(assert
 		(task (plan ?planName) (action_type spg_say)
 			(params "I could not stack the " ?cube " on top of the " ?top_cube ". I will try again.")
 			(step 1 $?steps) (parent ?t))
+		(cubes_put_cube stack_failed-speaking)
+	)
+)
+
+(defrule cubes_put_cube-stack-failed-get_info
+	(task (id ?t) (plan ?planName) (action_type cubes_put_cube) (params ?cube ~cubestable) (step $?steps))
+	(active_task ?t)
+	(not (task_status ?t ?))
+	(not (cancel_active_tasks))
+
+	?st <-(stacking ?top_cube)
+	?sp <-(cubes_put_cube stack_failed-speaking)
+	=>
+	(retract ?st ?sp)
+	(assert
+		(task (plan ?planName) (action_type cubes_get_info) (step 1 $?steps) (parent ?t))
 	)
 )

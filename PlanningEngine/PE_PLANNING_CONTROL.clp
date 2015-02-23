@@ -46,8 +46,16 @@
 			(task (id ?t3) (action_type ?action_type3))
 			(not (task (parent ?t3)))
 			(active_task ?t3)
-			(not (can_run_in_parallel ?action_type3 ?action_type2))
 			(not (can_run_in_parallel ?action_type2 ?action_type3))
+			(not (can_run_in_parallel ?action_type3 ?action_type2))
+			(or
+				(and
+					(not (can_run_in_parallel ?action_type2 *))
+					(not (can_run_in_parallel ?action_type3 *))
+				)
+				(cannot_run_in_parallel ?action_type2 ?action_type3)
+				(cannot_run_in_parallel ?action_type3 ?action_type2)
+			)
 		)
 	)
 	; There's not another task of the same hierarchy with a step number lower than this.
@@ -76,6 +84,14 @@
 	(task (plan ~?planName) (action_type ?action_type2))
 	(not (can_run_in_parallel ?action_type1 ?action_type2))
 	(not (can_run_in_parallel ?action_type2 ?action_type1))
+	(or
+		(and
+			(not (can_run_in_parallel ?action_type1 *))
+			(not (can_run_in_parallel ?action_type2 *))
+		)
+		(cannot_run_in_parallel ?action_type1 ?action_type2)
+		(cannot_run_in_parallel ?action_type2 ?action_type1)
+	)
 	(task_priority ?action_type2 ?x)
 	(task_priority ?action_type1 ?y)
 	(test (> ?x ?y))
@@ -115,6 +131,14 @@
 			(active_task ?t2)
 			(not (can_run_in_parallel ?action_type1 ?action_type2))
 			(not (can_run_in_parallel ?action_type2 ?action_type1))
+			(or
+				(and
+					(not (can_run_in_parallel ?action_type1 *))
+					(not (can_run_in_parallel ?action_type2 *))
+				)
+				(cannot_run_in_parallel ?action_type1 ?action_type2)
+				(cannot_run_in_parallel ?action_type2 ?action_type1)
+			)
 		)
 	)
 	; There's not another task of the same hierarchy with a step number lower than this.
@@ -194,6 +218,14 @@
 			(active_task ?t2)
 			(not (can_run_in_parallel ?action_type1 ?action_type2))
 			(not (can_run_in_parallel ?action_type2 ?action_type1))
+			(or
+				(and
+					(not (can_run_in_parallel ?action_type1 *))
+					(not (can_run_in_parallel ?action_type2 *))
+				)
+				(cannot_run_in_parallel ?action_type1 ?action_type2)
+				(cannot_run_in_parallel ?action_type2 ?action_type1)
+			)
 		)
 	)
 	; There's not another task of the same hierarchy with a step number lower than this.
@@ -227,6 +259,14 @@
 					(active_task ?t2)
 					(not (can_run_in_parallel ?action_type1 ?action_type2))
 					(not (can_run_in_parallel ?action_type2 ?action_type1))
+					(or
+						(and
+							(not (can_run_in_parallel ?action_type1 *))
+							(not (can_run_in_parallel ?action_type2 *))
+						)
+						(cannot_run_in_parallel ?action_type1 ?action_type2)
+						(cannot_run_in_parallel ?action_type2 ?action_type1)
+					)
 				)
 			)
 			; There's not another task of the same hierarchy with a step number lower than this.
@@ -638,6 +678,14 @@
 		(or
 			(can_run_in_parallel ?action_type1 ?action_type2)
 			(can_run_in_parallel ?action_type2 ?action_type1)
+			(and
+				(or
+					(can_run_in_parallel ?action_type1 *)
+					(can_run_in_parallel ?action_type2 *)
+				)
+				(not (cannot_run_in_parallel ?action_type1 ?action_type2))
+				(not (cannot_run_in_parallel ?action_type2 ?action_type1))
+			)
 		)
 	)
 	=>
@@ -658,6 +706,14 @@
 				(or
 					(can_run_in_parallel ?action_type1 ?action_type2)
 					(can_run_in_parallel ?action_type2 ?action_type1)
+					(and
+						(or
+							(can_run_in_parallel ?action_type1 *)
+							(can_run_in_parallel ?action_type2 *)
+						)
+						(not (cannot_run_in_parallel ?action_type1 ?action_type2))
+						(not (cannot_run_in_parallel ?action_type2 ?action_type1))
+					)
 				)
 			)
 		)

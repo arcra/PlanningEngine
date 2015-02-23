@@ -28,9 +28,10 @@
 
 (deffacts PE-init_facts
     (PE-last_plan nil)
-    (arm_info (side left) (enabled FALSE))
+;    (arm_info (side left) (enabled FALSE))
+	(arm_info (side left))
     (arm_info (side right))
-    (head_info (pan 0) (tilt -1))
+    (head_info (pan -1) (tilt -1))
 )
 
 (deffacts PE-settings

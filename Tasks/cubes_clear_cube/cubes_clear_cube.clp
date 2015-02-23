@@ -110,7 +110,7 @@
 	(stack $? ?cube $? ?top_cube)
 	=>
 	(assert
-		(task (plan ?planName) (action_type cubes_take_cube) (params ?top_cube) (step 1 $?steps) (parent ?t))
+		(task (plan ?planName) (action_type cubes_take_cube) (params decide ?top_cube) (step 1 $?steps) (parent ?t))
 	)
 )
 

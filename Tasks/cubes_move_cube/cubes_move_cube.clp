@@ -138,7 +138,7 @@
 	(cubes_move_cube speech_sent_move_cube)
 	=>
 	(assert
-		(task (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step 1 $?steps) (parent ?t))
+		(task (plan ?planName) (action_type cubes_take_cube) (params decide ?cube) (step 1 $?steps) (parent ?t))
 	)
 )
 
@@ -170,7 +170,7 @@
 	(not (cubes_move_cube speech_sent_move_cube))
 	=>
 	(assert
-		(task (plan ?planName) (action_type spg_say) (params "I will move " ?cube " on top of " ?top_cube)
+		(task (plan ?planName) (action_type spg_say) (params "I will move the " ?cube " on top of the " ?top_cube)
 			(step 1 $?steps) (parent ?t))
 		(cubes_move_cube speaking_move_cube)
 	)
@@ -219,7 +219,7 @@
 	(not (switching_sides))
 	=>
 	(assert
-		(task (plan ?planName) (action_type cubes_take_cube) (params ?cube) (step 1 $?steps) (parent ?t))
+		(task (plan ?planName) (action_type cubes_take_cube) (params decide ?cube) (step 1 $?steps) (parent ?t))
 	)
 )
 
@@ -294,12 +294,11 @@
 
 	(switching_sides)
 	(children_status ?t successful)
-	(cube ?cube ?x1 ?y1 ?z1)
 	(cube ?top_cube ? ?y2 ?)
 	(test (< ?y2 ?*cube_side*))
 	=>
 	(assert
-		(send-command "takexyz" switch_cube (str-cat "right " ?x1 " " ?y1 " " (+ ?z1 ?*cube_side*)) 50000 2)
+		(task (plan ?planName) (action_type cubes_take_cube) (params right ?cube) (step 1 $?steps) (parent ?t))
 	)
 )
 
@@ -311,12 +310,11 @@
 
 	(switching_sides)
 	(children_status ?t successful)
-	(cube ?cube ?x1 ?y1 ?z1)
 	(cube ?top_cube ? ?y2 ?)
 	(test (> ?y2 (- 0 ?*cube_side*)))
 	=>
 	(assert
-		(send-command "takexyz" switch_cube (str-cat "left " ?x1 " " ?y1 " " (+ ?z1 ?*cube_side*)) 50000 2)
+		(task (plan ?planName) (action_type cubes_take_cube) (params left ?cube) (step 1 $?steps) (parent ?t))
 	)
 )
 
@@ -327,9 +325,9 @@
 	(not (cancel_active_tasks))
 
 	?ss <-(switching_sides)
-	(BB_answer "takexyz" switch_cube 1 ?)
+	?f <-(children_status ?t successful)
 	=>
-	(retract ?ss)
+	(retract ?ss ?f)
 	(assert
 		(task (plan ?planName) (action_type cubes_put_cube) (params ?cube ?top_cube) (step 1 $?steps) (parent ?t))
 	)
@@ -342,9 +340,9 @@
 	(not (cancel_active_tasks))
 
 	?ss <-(switching_sides)
-	(BB_answer "takexyz" switch_cube 0 ?)
+	?f <-(children_status ?t failed)
 	=>
-	(retract ?ss)
+	(retract ?ss ?f)
 	(assert
 		(task (plan ?planName) (action_type spg_say)
 			(params "I could not take the " ?cube ". I will try again.") (step 1 $?steps) (parent ?t))
