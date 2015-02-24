@@ -422,7 +422,7 @@
 	(not (BB_answer "takexyz" take_cube_right ? ?))
 	(not (cubes_taking ?cube))
 	=>
-	(send-command "takexyz" take_cube_right (str-cat "right " ?x " " ?y " " (+ ?z ?*cube_side*)) 180000 2)
+	(send-command "takexyz" take_cube_right (str-cat "right " ?x " " ?y " " ?z) 180000 2)
 	(assert
 		(cubes_taking ?cube)
 	)
@@ -447,7 +447,7 @@
 	(not (BB_answer "takexyz" take_cube_left ? ?))
 	(not (cubes_taking ?cube))
 	=>
-	(send-command "takexyz" take_cube_left (str-cat "left " ?x " " ?y " " (+ ?z ?*cube_side*)) 180000 2)
+	(send-command "takexyz" take_cube_left (str-cat "left " ?x " " ?y " " ?z) 180000 2)
 	(assert
 		(cubes_taking ?cube)
 	)
@@ -511,7 +511,7 @@
 	(not (BB_answer "takexyz" take_cube_right ? ?))
 	(not (cubes_taking ?cube))
 	=>
-	(send-command "takexyz" take_cube_right (str-cat "right " ?x " " ?y " " (+ ?z ?*cube_side*)) 180000 2)
+	(send-command "takexyz" take_cube_right (str-cat "right " ?x " " ?y " " ?z) 180000 2)
 	(assert
 		(cubes_taking ?cube)
 	)
@@ -575,7 +575,7 @@
 	(not (BB_answer "takexyz" take_cube_left ? ?))
 	(not (cubes_taking ?cube))
 	=>
-	(send-command "takexyz" take_cube_left (str-cat "left " ?x " " ?y " " (+ ?z ?*cube_side*)) 180000 2)
+	(send-command "takexyz" take_cube_left (str-cat "left " ?x " " ?y " " ?z) 180000 2)
 	(assert
 		(cubes_taking ?cube)
 	)

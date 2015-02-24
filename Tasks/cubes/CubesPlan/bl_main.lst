@@ -1,4 +1,4 @@
-../../PlanningEngine/bootloader.lst
+../../../PlanningEngine/bootloader.lst
 init.clp
 ; cubes_plan.lst
 ../hd_lookat/hd_lookat.lst

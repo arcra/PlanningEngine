@@ -99,7 +99,7 @@
 		(bind ?offset (/ (* ?y -0.08) -0.45))
 	)
 	(assert
-		(cube (sym-cat ?name _cube) (+ ?x 0.03) (+ ?y ?offset) (- ?z 0.06))
+		(cube (sym-cat ?name _cube) (+ ?x 0.04) (+ ?y ?offset) (- ?z 0.04))
 ;		(cube (sym-cat ?name _cube) ?x ?y (- ?z 0.06))
 ;		(cube (sym-cat ?name _cube) ?x ?y ?z)
 		(cubes_info $?cubes_info)

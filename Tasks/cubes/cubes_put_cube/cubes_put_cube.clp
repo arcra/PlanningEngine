@@ -139,7 +139,7 @@
 	(arm_info (side ?side) (grabbing ?cube))
 	=>
 	(retract ?f1)
-	(send-command "dropxyz" drop_free (str-cat ?side " " ?x " " ?y " " (- ?z 0.03)) 180000)
+	(send-command "dropxyz" drop_free (str-cat ?side " " ?x " " ?y " " ?z) 180000)
 	(assert
 		(dropping ?fs)
 	)
@@ -401,7 +401,7 @@
 	)
 	=>
 	(retract ?ffs)
-	(send-command "dropxyz" stack_cube (str-cat "right " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
+	(send-command "dropxyz" stack_cube (str-cat "right " ?x " " ?y " " (+ ?z ?*cube_offset*)) 180000)
 	(assert
 		(stacking ?top_cube)
 	)
@@ -454,7 +454,7 @@
 	)
 	=>
 	(retract ?ffs)
-	(send-command "dropxyz" stack_cube (str-cat "left " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
+	(send-command "dropxyz" stack_cube (str-cat "left " ?x " " ?y " " (+ ?z ?*cube_offset*)) 180000)
 	(assert
 		(stacking ?top_cube)
 	)
@@ -472,7 +472,7 @@
 	(cube ?top_cube ?x ?y ?z)
 	(not (stacking ?top_cube))
 	=>
-	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
+	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z ?*cube_offset*)) 180000)
 	(assert
 		(stacking ?top_cube)
 	)
@@ -491,7 +491,7 @@
 	(test (< ?y ?*cube_side*))
 	(test (> ?y (- 0 ?*cube_side*)))
 	=>
-	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z (* 1.5 ?*cube_offset*))) 180000)
+	(send-command "dropxyz" stack_cube (str-cat ?side " " ?x " " ?y " " (+ ?z ?*cube_offset*)) 180000)
 	(assert
 		(stacking ?top_cube)
 	)
