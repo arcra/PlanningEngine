@@ -4,10 +4,9 @@
 (defrule getclose_location-not_moved
 	(task (id ?t) (action_type getclose_location) (params ?location))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
+	
 	(speech_notification_sent getclose_location)
 	(not (moving))
 	=>
@@ -110,6 +109,7 @@
 	(not (task_status ?t ?))
 	(cancel_active_tasks)
 
+	(moving)
 	(not (BB_answer "mp_stop" cancel_getclose_location ? ?))
 	(not (waiting (symbol cancel_getclose_location)))
 	=>
@@ -122,6 +122,7 @@
 	(not (task_status ?t ?))
 	(cancel_active_tasks)
 
+	(moving)
 	(BB_answer "mp_stop" cancel_getclose_location 0 ?)
 	=>
 	(send-command "mp_stop" cancel_getclose_location "" 1000)
@@ -146,35 +147,9 @@
 	(not (task_status ?t ?))
 	(cancel_active_tasks)
 
-	(BB_answer "mp_stop" cancel_getclose_location 1 ?)
+	;(BB_answer "mp_stop" cancel_getclose_location 1 ?)
 	?sn <-(speech_notification_sent getclose_location)
 	(not (moving))
 	=>
 	(retract ?sn)
-)
-
-(defrule getclose_location-cancel-successful_response-not_speech-moving
-	(task (id ?t) (action_type getclose_location))
-	(active_task ?t)
-	(not (task_status ?t ?))
-	(cancel_active_tasks)
-
-	(BB_answer "mp_stop" cancel_getclose_location 1 ?)
-	(not (speech_notification_sent getclose_location) )
-	?m <-(moving)
-	=>
-	(retract ?m)
-)
-
-(defrule getclose_location-cancel-successful_response-not_speech-not_moving
-	(task (id ?t) (action_type getclose_location))
-	?at <-(active_task ?t)
-	(not (task_status ?t ?))
-	(cancel_active_tasks)
-
-	(BB_answer "mp_stop" cancel_getclose_location 1 ?)
-	(not (speech_notification_sent getclose_location) )
-	(not (moving))
-	=>
-	(retract ?at)
 )

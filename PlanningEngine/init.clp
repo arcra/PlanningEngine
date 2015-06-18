@@ -26,17 +26,109 @@
 	)
 )
 
-(deffacts PE-init_facts
-    (PE-last_plan nil)
-;    (arm_info (side left) (enabled FALSE))
-	(arm_info (side left))
-    (arm_info (side right))
-    (head_info (pan -1) (tilt -1))
+(deftemplate robot_info
+	(slot location
+		(type SYMBOL)
+		(default custom)
+	)
+	(slot status
+		(type SYMBOL)
+		(default normal)
+	)
+	(slot x
+		(type NUMBER)
+	)
+	(slot y
+		(type NUMBER)
+	)
+	(slot angle
+		(type NUMBER)
+	)
 )
 
-(deffacts PE-settings
-    (can_run_in_parallel la_goto ra_goto)
-    (can_run_in_parallel la_goto hd_lookat)
-    (can_run_in_parallel ra_goto hd_lookat)
-    (can_run_in_parallel subscribe_to_shared_var subscribe_to_shared_var)
+(deftemplate item
+	(slot name
+		(type LEXEME)
+	)
+	(slot speech_name
+		(type LEXEME)
+	)
+	(slot location
+		(type LEXEME)
+		(default unknown)
+	)
+)
+
+(deftemplate location
+	(slot name
+		(type SYMBOL)
+	)
+	(slot speech_name
+		(type LEXEME)
+	)
+	(slot room
+		(type SYMBOL)
+		(default unknown)
+	)
+)
+
+(deftemplate position
+	(slot name
+		(type SYMBOL)
+	)
+	(slot x
+		(type NUMBER)
+	)
+	(slot y
+		(type NUMBER)
+	)
+	(slot angle
+		(type NUMBER)
+	)
+)
+
+(deftemplate room
+	(slot name
+		(type SYMBOL)
+	)
+	(slot speech_name
+		(type LEXEME)
+	)
+)
+
+(deftemplate module
+	(slot name
+		(type LEXEME)
+	)
+	(slot id
+		(type STRING)
+	)
+	(slot status
+		(type SYMBOL)
+		(default connected)
+	)
+	(slot speech_name
+		(type LEXEME)
+	)
+)
+
+(deftemplate person
+	(slot name
+		(type LEXEME)
+	)
+	(slot speech_name
+		(type LEXEME)
+	)
+	(slot location
+		(type SYMBOL)
+		(default unknown)
+	)
+	(slot room
+		(type SYMBOL)
+		(default unknown)
+	)
+)
+
+(deffacts PE-init_facts
+	(PE-last_plan nil)
 )

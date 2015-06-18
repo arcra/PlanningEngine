@@ -86,20 +86,6 @@
 	(retract ?w)
 )
 
-(defrule wait_for_user_instruction-wait_for_instruction
-	(task (id ?t) (action_type wait_for_user_instruction) (step $?steps))
-	(active_task ?t)
-	(not (task_status ?t ?))
-	(not (canceling_active_tasks))
-
-	(not (BB_sv_updated "recognizedSpeech" ? ? ? $?))
-	(wait_for_user_instruction waiting)
-	(not (timer_sent wait_for_user_instruction-waiting))
-	(not (BB_timer wait_for_user_instruction-waiting))
-	=>
-	(setTimer 3000 wait_for_user_instruction-waiting)
-)
-
 (defrule wait_for_user_instruction-send_phrase
 	(task (id ?t) (action_type wait_for_user_instruction) (step $?steps))
 	(active_task ?t)

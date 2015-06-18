@@ -5,6 +5,7 @@
 		(task_status ?t ?)
 	)
 	(not (cancel_active_tasks))
+
 	(not (waiting (symbol =(sym-cat check_module_is_connected_ ?module))))
 	(not (BB_answer "connected" =(sym-cat check_module_is_connected_ ?module) 1 ?))
 	=>
@@ -14,10 +15,9 @@
 (defrule check_module_is_connected-not_connected
 	(task (id ?t) (plan ?planName) (action_type check_module_is_connected) (params ?module) (step $?steps) )
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
+	
 	(BB_answer "connected" =(sym-cat check_module_is_connected_ ?module) 0 ?)
 	=>
 	(assert

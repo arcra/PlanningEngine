@@ -1,5 +1,6 @@
 DefTemplates.clp
 init.clp
+user_functions.clp
 PE_DETECT_ERRORS.clp
 PE_PLANNING_CONTROL.clp
 PE_PLAN_OUTCOMES.clp

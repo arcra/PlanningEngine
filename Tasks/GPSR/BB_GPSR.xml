@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blackboard version="1.0">
+	
+	<configuration>
+		<name>BLK</name>
+		<port>2300</port>
+		<sendAttemps>2</sendAttemps>
+		<commands />
+		<startupSequence />
+		<shutdownSequence />
+	</configuration>
+
+	<sharedVariables>
+		<var name="test_shared_var" type="string"/>
+	</sharedVariables>
+	
+	<modules>
+		
+		<module name="LAP">
+			<ip>127.0.0.1</ip>
+			<!-- <ip>192.168.190.106</ip> -->
+			<port>2000</port>
+			<aliveCheck>true</aliveCheck>
+			<requirePrefix>true</requirePrefix>
+			<commands>
+				<command name="addFact" answer="False" parameters="True" timeout="500"  priority="True" />
+			</commands>
+		</module>
+
+		<module name="SP-GEN">
+			<onStart>
+				<send command="spg_say" params="Hello?" id="1" />
+			</onStart>
+			<ip>127.0.0.1</ip>
+			<port>2052</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="spg_say" answer="true" timeout="20000" priority="True" /> 
+				<command name="say" answer="true" timeout="20000" priority="True" /> 
+				<command name="spg_asay" answer="true" timeout="500" priority="True" /> 
+				<command name="spg_read" answer="true" timeout="120000" priority="True" /> 
+				<command name="read" answer="true" timeout="120000" priority="True" /> 
+				<command name="spg_aread" answer="true" timeout="500" priority="True" /> 
+				<command name="spg_aplay" answer="true" timeout="500" priority="True" /> 
+				<command name="spg_playloop" answer="true" timeout="500" priority="True" /> 
+				<command name="spg_shutup" answer="true" timeout="500"  parameters="False" /> 
+				<command name="spg_play" answer="true" timeout="120000" priority="True" /> 
+				<command name="spg_voice" answer="True" timeout="500" parameters="True" />
+			</commands>
+		</module>
+		
+		<module name="SP-REC">
+			<ip>127.0.0.1</ip>
+			<!-- <ip>192.168.190.207</ip> -->
+			<port>2020</port>
+			<program processName="SpRec" path="Z:\RoboCup\Robot Apps\SpRec\SpRec.exe" args="-r 2022 -w 2022 -g Fashion.xml" />
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="sprec_na" answer="False" parameters="True" priority="True" />
+				<command name="spr_status" answer="True" timeout="2000" priority="True" />
+				<command name="spr_grammar" answer="True" parameters="False" timeout="5000" priority="True" />
+				<command name="spr_words" answer="True" timeout="2000" priority="True" />
+			</commands>
+		</module>
+		
+	</modules>
+
+</blackboard>

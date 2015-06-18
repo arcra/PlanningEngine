@@ -1,10 +1,9 @@
 (defrule check_location_exists-send_command
 	(task (id ?t) (action_type check_location_exists) (params ?location))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
+
 	(not (waiting (symbol check_location_exists)))
 	(not (BB_answer "mp_position" check_location_exists 1 ?))
 	=>
@@ -12,12 +11,11 @@
 )
 
 (defrule check_location_exists-does_NOT_exist
-	(task (id ?t) (plan ?planName) (action_type check_location_exists) (params ?location) (step $?steps) (parent ?pt) )
+	(task (id ?t) (plan ?planName) (action_type check_location_exists) (params ?location) (step $?steps))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
+
 	(BB_answer "mp_position" check_location_exists 0 ?)
 	=>
 	(assert
@@ -28,10 +26,9 @@
 (defrule check_location_exists-exists
 	(task (id ?t) (action_type check_location_exists))
 	(active_task ?t)
-	(not
-		(task_status ?t ?)
-	)
+	(not (task_status ?t ?))
 	(not (cancel_active_tasks))
+	
 	(BB_answer "mp_position" check_location_exists 1 ?)
 	=>
 	(assert

@@ -229,7 +229,7 @@
 	(assert
 		(task_status ?t failed)
 	)
-	(stop)
+	;(stop)
 )
 
 (defrule failed_task-mark_task_without_rules_as_failed-delete_orphan_failed_facts
