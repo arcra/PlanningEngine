@@ -81,7 +81,7 @@
 	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	(active_task ?t)
 	; There's another task from a different plan that should have been activated before this one.
-	(task (plan ~?planName) (action_type ?action_type2))
+	(task (plan ~?planName&~user_speech) (action_type ?action_type2))
 	(not (can_run_in_parallel ?action_type1 ?action_type2))
 	(not (can_run_in_parallel ?action_type2 ?action_type1))
 	(or
@@ -117,7 +117,7 @@
 	; So it wouldn't depend on the children_status facts.
 	(not (children_status $?))
 	; There's a task taht is not active and has no children tasks.
-	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
+	(task (id ?t) (plan ?planName&~user_speech) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	(not (active_task ?t))
 	(not (task (parent ?t)))
 	; There's no active "leaf node" task (from this or other plan)
