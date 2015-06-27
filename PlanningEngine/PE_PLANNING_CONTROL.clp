@@ -30,7 +30,7 @@
 	(PE-allTasksEnabled)
 	(not (PE-ready_to_plan))
 	(not (task_status ? ?))
-	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
+	(task (id ?t) (plan ?planName&~user_speech&~"user_speech") (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	?at <-(active_task ?t)
 	; There's another task of the same plan that should have been activated before this one.
 	; There's another task that is no parent of other task (is a leaf node)
@@ -81,7 +81,7 @@
 	(task (id ?t) (plan ?planName) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	(active_task ?t)
 	; There's another task from a different plan that should have been activated before this one.
-	(task (plan ~?planName&~user_speech) (action_type ?action_type2))
+	(task (plan ~?planName&~user_speech&~"user_speech") (action_type ?action_type2))
 	(not (can_run_in_parallel ?action_type1 ?action_type2))
 	(not (can_run_in_parallel ?action_type2 ?action_type1))
 	(or
@@ -117,7 +117,7 @@
 	; So it wouldn't depend on the children_status facts.
 	(not (children_status $?))
 	; There's a task taht is not active and has no children tasks.
-	(task (id ?t) (plan ?planName&~user_speech) (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
+	(task (id ?t) (plan ?planName&~user_speech&~"user_speech") (action_type ?action_type1) (step ?step1 $?steps1) (params $?params1))
 	(not (active_task ?t))
 	(not (task (parent ?t)))
 	; There's no active "leaf node" task (from this or other plan)
@@ -203,7 +203,7 @@
 (defrule EnableMostDetailedTasksFromPlans
 	(not (PE-allTasksEnabled))
 	(PE-ready_to_plan)
-	(task (id ?t) (plan ?planName) (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
+	(task (id ?t) (plan ?planName&~user_speech&~"user_speech") (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
 	(not (PE-enabled_task ?t))
 	(not (active_task ?t))
 	(not (task (parent ?t)))
@@ -247,7 +247,7 @@
 	(PE-ready_to_plan)
 	(not
 		(and
-			(task (id ?t) (plan ?planName) (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
+			(task (id ?t) (plan ?planName&~user_speech&~"user_speech") (action_type ?action_type) (params $?params1) (step ?step1 $?steps1))
 			(not (PE-enabled_task ?t))
 			(not (active_task ?t))
 			(not (task (parent ?t)))
@@ -639,7 +639,7 @@
 	)
 	?et <-(PE-enabled_task ?t)
 	?d <-(PE-discarded $?discarded)
-	(task (id ?t) (plan ?planName))
+	(task (id ?t) (plan ?planName) (action_type ?action_type))
 	; There's no other enabled task that is not discarded. (i. e. this is the only one activable.)
 	(not
 		(and
@@ -768,6 +768,9 @@
 		(PE-activable_tasks $?tasks)
 	)
 	(log-message INFO "Task activated: (task (id " ?at ") (plan \"" ?planName "\") (action_type " ?action_type ") (step " (implode$ $?steps) ") (params " (implode$ $?params) ") )")
+	;(if (eq ?action_type confirm_user_instructions) then
+	;	(stop)
+	;)
 )
 
 (defrule set_task_active-search_parallel_tasks-stop_logging

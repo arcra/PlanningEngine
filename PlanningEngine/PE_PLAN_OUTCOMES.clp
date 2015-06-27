@@ -194,6 +194,7 @@
 	)
 	(log-message INFO "Task " ?t " failed. (No executable rules).")
 	(log-message INFO "Task " ?t ": " ?planName " - " ?action_type " - " (implode$ $?params))
+	;(stop)
 )
 
 (defrule failed_task-mark_task_without_rules_as_failed-set_failure_task-children_status ; When a task has no enabled rules (either to assert new sub-tasks or perform an action) it is either an incomplete design or (most likely) a task set to re-plan but with no more alternatives, which should be marked as failed.

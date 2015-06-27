@@ -1,0 +1,5 @@
+attend_person.clp
+../save_position/save_position.lst
+../wait_for_user_instruction/wait_for_user_instruction.lst
+../spg_say/spg_say.lst
+../getclose_position/getclose_position.lst

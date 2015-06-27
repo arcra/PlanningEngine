@@ -1,6 +1,6 @@
 (deffacts GPSR_init_facts
 	(task (plan "GPSR") (action_type subscribe_to_shared_var) (params "recognizedSpeech") (step 1) )
-        (task (plan "GPSR") (action_type attend_person) (step 2))
+        (task (plan "GPSR") (action_type wait_for_user_instruction) (step 2))
 )
 
 (deffacts init_facts
@@ -56,7 +56,9 @@
 
 (deffacts task_settings
 
+        (item (name apple) (speech_name "apple") (location kitchen_table))
         (location (name kitchen_table) (speech_name "kitchen table") (room kitchen))
+        (room (name kitchen) (speech_name "kitchen"))
         
         (task_priority recover_object 100)
 )

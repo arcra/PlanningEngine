@@ -1,0 +1,3 @@
+check_find_object.clp
+../check_module_is_connected/check_module_is_connected.lst
+../wait_user_start_module/wait_user_start_module.lst

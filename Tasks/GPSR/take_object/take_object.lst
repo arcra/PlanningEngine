@@ -1,0 +1,7 @@
+take_object.clp
+../check_take_object/check_take_object.lst
+../find_object/find_object.lst
+../spg_say/spg_say.lst
+../monitor_grabbing/monitor_grabbing.lst
+../spg_say/spg_say.lst
+../spg_say/spg_say.lst

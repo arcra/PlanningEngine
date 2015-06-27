@@ -1,0 +1,5 @@
+put_object_in_location.clp
+../get_object/get_object.lst
+../getclose_location/getclose_location.lst
+../drop/drop.lst
+../spg_say/spg_say.lst

@@ -1,0 +1,5 @@
+deliver_in_position.clp
+../get_object/get_object.lst
+../handover_object/handover_object.lst
+../getclose_position/getclose_position.lst
+../spg_say/spg_say.lst
