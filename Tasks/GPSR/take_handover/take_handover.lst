@@ -1,13 +1,9 @@
 take_handover.clp
 ../spg_say/spg_say.lst
-../spg_say/spg_say.lst
 ../la_goto/la_goto.lst
 ../ra_goto/ra_goto.lst
-../spg_say/spg_say.lst
 ../la_open/la_open.lst
 ../ra_open/ra_open.lst
 ../la_close/la_close.lst
 ../ra_close/ra_close.lst
-../la_goto/la_goto.lst
-../ra_goto/ra_goto.lst
 ../monitor_grabbing/monitor_grabbing.lst

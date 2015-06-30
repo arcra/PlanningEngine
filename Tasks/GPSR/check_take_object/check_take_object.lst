@@ -1,6 +1,4 @@
 check_take_object.clp
 ../check_module_is_connected/check_module_is_connected.lst
-../check_module_is_connected/check_module_is_connected.lst
-../wait_user_start_module/wait_user_start_module.lst
 ../wait_user_start_module/wait_user_start_module.lst
 ../spg_say/spg_say.lst

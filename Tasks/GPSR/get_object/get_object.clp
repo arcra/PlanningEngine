@@ -99,7 +99,7 @@
 	)
 	=>
 	(assert
-		(task (plan ?pnpdt_planName__) (action_type find_object_in_room) (params ?object unknown) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(task (plan ?pnpdt_planName__) (action_type find_object_in_place) (params ?object unknown) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
@@ -119,7 +119,7 @@
 	)
 	=>
 	(assert
-		(task (plan ?pnpdt_planName__) (action_type find_object_in_room) (params ?object ?room) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(task (plan ?pnpdt_planName__) (action_type find_object_in_place) (params ?object ?room) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 

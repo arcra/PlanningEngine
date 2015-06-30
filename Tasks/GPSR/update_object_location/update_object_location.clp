@@ -129,7 +129,7 @@
 	)
 )
 
-(defrule update_object_location-update
+(defrule update_object_location-update-loc_in_room
 	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type update_object_location) (params ?object ?location) (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
@@ -138,9 +138,32 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	?pnpdt_f1__ <-(item (name ?object) (speech_name ?item_name))
+	(location (name ?item_loc) (room ?location))
+	(item (name ?object) (speech_name ?item_name) (location ?item_loc))
 	(not
 		(update_object_location updated)
+	)
+	=>
+	(assert
+		(update_object_location updated)
+	)
+)
+
+(defrule update_object_location-update-new_loc
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type update_object_location) (params ?object ?location) (step $?pnpdt_steps__) )
+	(active_task ?pnpdt_task__)
+	(not
+		(cancel_active_tasks)
+	)
+	(not
+		(task_status ?pnpdt_task__ ?)
+	)
+	?pnpdt_f1__ <-(item (name ?object) (speech_name ?item_name) (location ?item_loc))
+	(not
+		(update_object_location updated)
+	)
+	(not
+		(location (name ?item_loc) (room ?location))
 	)
 	=>
 	(retract ?pnpdt_f1__)
