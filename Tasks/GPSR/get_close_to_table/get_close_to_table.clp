@@ -12,13 +12,13 @@
 		(task_status ?pnpdt_task__ ?)
 	)
 	(not
-		(BB_answer "alignedge" align_edge 1 ?)
-	)
-	(not
 		(waiting (symbol align_edge))
 	)
+	(not
+		(BB_answer "aligneedge" align_edge 1 ?)
+	)
 	=>
-	(send-command "alignedge" align_edge "" 15000 )
+	(send-command "aligneedge" align_edge "" 15000 )
 )
 
 (defrule get_close_to_table-success
@@ -30,7 +30,7 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	?pnpdt_f1__ <-(BB_answer "alignedge" align_edge 1 ?)
+	?pnpdt_f1__ <-(BB_answer "aligneedge" align_edge 1 ?)
 	=>
 	(retract ?pnpdt_f1__)
 	(assert
