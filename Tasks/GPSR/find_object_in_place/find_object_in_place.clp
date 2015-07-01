@@ -179,6 +179,7 @@
 	(item (name ?object))
 	(find_object_in_room searching_location ?loc)
 	(robot_info (location ?loc))
+	?pnpdt_f1__ <-(find_object_in_room getting_close_to_table)
 	(not
 		(find_object_in_room searching)
 	)
@@ -186,9 +187,38 @@
 		(arm_info (grabbing ?object))
 	)
 	=>
+	(retract ?pnpdt_f1__)
 	(assert
 		(find_object_in_room searching)
 		(task (plan ?pnpdt_planName__) (action_type find_object) (params ?object) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+	)
+)
+
+(defrule find_object_in_place-get_close_to_table
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type find_object_in_place) (params ?object ?place) (step $?pnpdt_steps__) )
+	(active_task ?pnpdt_task__)
+	(not
+		(cancel_active_tasks)
+	)
+	(not
+		(task_status ?pnpdt_task__ ?)
+	)
+	(item (name ?object))
+	(find_object_in_room searching_location ?loc)
+	(robot_info (location ?loc))
+	(not
+		(find_object_in_room searching)
+	)
+	(not
+		(arm_info (grabbing ?object))
+	)
+	(not
+		(find_object_in_room getting_close_to_table)
+	)
+	=>
+	(assert
+		(find_object_in_room getting_close_to_table)
+		(task (plan ?pnpdt_planName__) (action_type get_close_to_table) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 

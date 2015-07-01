@@ -1,4 +1,5 @@
 get_object.clp
-../getclose_location/getclose_location.lst
-../take_object/take_object.lst
 ../find_object_in_place/find_object_in_place.lst
+../getclose_location/getclose_location.lst
+../get_close_to_table/get_close_to_table.lst
+../take_object/take_object.lst

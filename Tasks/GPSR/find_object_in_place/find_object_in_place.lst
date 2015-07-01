@@ -2,4 +2,5 @@ find_object_in_place.clp
 ../update_object_location/update_object_location.lst
 ../spg_say/spg_say.lst
 ../find_object/find_object.lst
+../get_close_to_table/get_close_to_table.lst
 ../getclose_location/getclose_location.lst
