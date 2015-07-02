@@ -2,8 +2,8 @@
 #         DEXEC RULES
 ################################
 
-(defrule confirm_DIP-ask_object
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_DIP-ask_object
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -20,7 +20,7 @@
 		(arm_info (grabbing ?object))
 	)
 	(not
-		(confirm_DIP decomposed)
+		(dispatch_DIP decomposed)
 	)
 	(not
 		(object_confirmed ?)
@@ -31,8 +31,8 @@
 	)
 )
 
-(defrule confirm_DIP-ask_object_location
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_DIP-ask_object_location
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -47,7 +47,7 @@
 		(arm_info (grabbing ?object))
 	)
 	(not
-		(confirm_DIP decomposed)
+		(dispatch_DIP decomposed)
 	)
 	=>
 	(retract ?pnpdt_f1__)
@@ -56,8 +56,8 @@
 	)
 )
 
-(defrule confirm_DIP-decompose
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_DIP-decompose
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -75,18 +75,18 @@
 		(arm_info (grabbing ?object))
 	)
 	(not
-		(confirm_DIP decomposed)
+		(dispatch_DIP decomposed)
 	)
 	=>
 	(retract ?pnpdt_f1__)
 	(assert
-		(confirm_DIP decomposed)
+		(dispatch_DIP decomposed)
 		(task (plan ?pnpdt_planName__) (action_type deliver_in_position) (params ?object ?position) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
-(defrule confirm_DIP-fail
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_DIP-fail
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -94,7 +94,7 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	?pnpdt_f1__ <-(confirm_DIP failed)
+	?pnpdt_f1__ <-(dispatch_DIP failed)
 	=>
 	(retract ?pnpdt_f1__)
 	(assert
@@ -102,8 +102,8 @@
 	)
 )
 
-(defrule confirm_DIP-failed-speech
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_DIP-failed-speech
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -116,18 +116,18 @@
 		(position (name ?position))
 	)
 	(not
-		(confirm_DIP failed)
+		(dispatch_DIP failed)
 	)
 	=>
 	(retract ?pnpdt_f1__)
 	(assert
-		(confirm_DIP failed)
+		(dispatch_DIP failed)
 		(task (plan ?pnpdt_planName__) (action_type spg_say) (params "I'm sorry I don't know the location where to deliver the object. I cannot accomplish your request.") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
-(defrule confirm_DIP-set_object
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_DIP-set_object
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -144,7 +144,7 @@
 		(arm_info (grabbing ?object))
 	)
 	(not
-		(confirm_DIP decomposed)
+		(dispatch_DIP decomposed)
 	)
 	=>
 	(retract ?pnpdt_f1__ ?pnpdt_f2__)
@@ -153,8 +153,8 @@
 	)
 )
 
-(defrule confirm_DIP-set_object_location
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_DIP-set_object_location
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -169,7 +169,7 @@
 		(arm_info (grabbing ?object))
 	)
 	(not
-		(confirm_DIP decomposed)
+		(dispatch_DIP decomposed)
 	)
 	=>
 	(retract ?pnpdt_f1__ ?pnpdt_f2__)
@@ -182,14 +182,14 @@
 #      FINALIZING RULES
 ################################
 
-(defrule confirm_DIP-clear-task_flags
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_DIP-clear-task_flags
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
 	)
 	(task_status ?pnpdt_task__ ?)
-	?pnpdt_f1__ <-(confirm_DIP $?)
+	?pnpdt_f1__ <-(dispatch_DIP $?)
 	=>
 	(retract ?pnpdt_f1__)
 )

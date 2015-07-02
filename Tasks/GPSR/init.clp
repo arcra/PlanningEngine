@@ -1,6 +1,15 @@
 (deffacts GPSR_init_facts
-	(task (plan "GPSR") (action_type subscribe_to_shared_var) (params "recognizedSpeech") (step 1) )
-        (task (plan "GPSR") (action_type wait_for_user_instruction) (step 2))
+	(task (plan "GPSR") (action_type GPSR) (params "") (step 1) )
+)
+
+(deffacts task_settings
+
+        (location (name gpsr_pos) (speech_name "designated position for gpsr test") (room unknown))
+        (location (name exit) (speech_name "exit") (room unknown))
+        
+        (item (name apple_juice) (speech_name "apple juice") (location kitchen_table))
+        (location (name kitchen_table) (speech_name "kitchen table") (room kitchen))
+        (room (name kitchen) (speech_name "kitchen"))
 )
 
 (deffacts init_facts
@@ -49,16 +58,7 @@
         (module (name ARMS) (speech_name "arms module") (id "ARMS"))
         (module (name HEAD) (speech_name "head module") (id "HEAD"))
         (module (name MVN_PLN) (speech_name "motion planner") (id "MVN-PLN"))
-;        (module (name VISION) (speech_name "vision system") (id "OBJ-FNDT"))
+        (module (name VISION) (speech_name "vision system") (id "OBJ-FNDT"))
         (module (name ST_PLN) (speech_name "simple task planner") (id "ST-PLN"))
         (module (name NLP) (speech_name "natural language processing system") (id "LANG_UND"))
-)
-
-(deffacts task_settings
-
-        (item (name apple) (speech_name "apple") (location kitchen_table))
-        (location (name kitchen_table) (speech_name "kitchen table") (room kitchen))
-        (room (name kitchen) (speech_name "kitchen"))
-        
-        (task_priority recover_object 100)
 )

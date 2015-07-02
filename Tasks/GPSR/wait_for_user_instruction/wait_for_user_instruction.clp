@@ -402,7 +402,7 @@
 	(retract ?pnpdt_f1__)
 	(assert
 		(wait_for_user_instruction ?pnpdt_task__ executing)
-		(task (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(task (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 

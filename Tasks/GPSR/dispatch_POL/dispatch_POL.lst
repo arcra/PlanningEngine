@@ -1,4 +1,4 @@
-confirm_POL.clp
+dispatch_POL.clp
 ../ask_location/ask_location.lst
 ../ask_object/ask_object.lst
 ../put_object_in_location/put_object_in_location.lst

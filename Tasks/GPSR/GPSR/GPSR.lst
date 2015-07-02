@@ -1,0 +1,4 @@
+GPSR.clp
+../subscribe_to_shared_var/subscribe_to_shared_var.lst
+../getclose_location/getclose_location.lst
+../wait_for_user_instruction/wait_for_user_instruction.lst

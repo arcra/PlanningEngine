@@ -2,8 +2,8 @@
 #         DEXEC RULES
 ################################
 
-(defrule confirm_user_instructions-APR-WFI-dispatch
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-APR-WFI-dispatch
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -30,8 +30,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-DIP
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-DIP
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -48,12 +48,12 @@
 	)
 	=>
 	(assert
-		(task (plan ?pnpdt_planName__) (action_type confirm_DIP) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(task (plan ?pnpdt_planName__) (action_type dispatch_DIP) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
-(defrule confirm_user_instructions-GCL-GCL-GCL-dispatch
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-GCL-GCL-GCL-dispatch
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -86,8 +86,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-GO-APR-HOO-dispatch
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-GO-APR-HOO-dispatch
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -118,8 +118,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-GO-DIP-dispatch
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-GO-DIP-dispatch
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -147,8 +147,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-GO-POL-dispatch
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-GO-POL-dispatch
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -176,8 +176,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-POL
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-POL
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -194,12 +194,12 @@
 	)
 	=>
 	(assert
-		(task (plan ?pnpdt_planName__) (action_type confirm_POL) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(task (plan ?pnpdt_planName__) (action_type dispatch_POL) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
-(defrule confirm_user_instructions-SAVE_POS
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-SAVE_POS
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -215,8 +215,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-SPG_SAY
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-SPG_SAY
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -228,7 +228,7 @@
 	(not
 		(and
 			(task (plan user_speech) (id ?id2))
-			(test (neq ?id ?id2))
+			(test (neq ?id2 ?id))
 		)
 	)
 	=>
@@ -238,8 +238,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-THO
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-THO
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -256,12 +256,12 @@
 	)
 	=>
 	(assert
-		(task (plan ?pnpdt_planName__) (action_type confirm_THO) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(task (plan ?pnpdt_planName__) (action_type dispatch_THO) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
-(defrule confirm_user_instructions-THO-POL-dispatch
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-THO-POL-dispatch
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -288,8 +288,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-THO-POL-get_location
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-THO-POL-get_location
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -297,7 +297,7 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	(confirm_user_instructions object_name ?item_name)
+	(dispatch_user_instructions object_name ?item_name)
 	(task (plan user_speech) (id ?id2) (action_type take_handover) (params ?object))
 	(task (plan user_speech) (id ?id) (action_type put_object_in_location) (params ?object ?location))
 	(not
@@ -308,20 +308,20 @@
 		)
 	)
 	(not
-		(confirm_user_instructions getting_location)
+		(dispatch_user_instructions getting_location)
 	)
 	(not
 		(location (name ?location))
 	)
 	=>
 	(assert
-		(confirm_user_instructions getting_location)
+		(dispatch_user_instructions getting_location)
 		(task (plan ?pnpdt_planName__) (action_type ask_location) (params (str-cat "Where do you want me to take the " ?item_name "?")) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
-(defrule confirm_user_instructions-THO-POL-object_known
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-THO-POL-object_known
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -340,16 +340,16 @@
 		)
 	)
 	(not
-		(confirm_user_instructions object_name ?)
+		(dispatch_user_instructions object_name ?)
 	)
 	=>
 	(assert
-		(confirm_user_instructions object_name ?sp_name)
+		(dispatch_user_instructions object_name ?sp_name)
 	)
 )
 
-(defrule confirm_user_instructions-THO-POL-object_unknown
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-THO-POL-object_unknown
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -370,16 +370,16 @@
 		(item (name ?object))
 	)
 	(not
-		(confirm_user_instructions object_name ?)
+		(dispatch_user_instructions object_name ?)
 	)
 	=>
 	(assert
-		(confirm_user_instructions object_name ?object)
+		(dispatch_user_instructions object_name ?object)
 	)
 )
 
-(defrule confirm_user_instructions-THO-POL-set_location
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-THO-POL-set_location
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -388,7 +388,7 @@
 		(task_status ?pnpdt_task__ ?)
 	)
 	(task (plan user_speech) (id ?id2) (action_type take_handover) (params ?object))
-	?pnpdt_f1__ <-(confirm_user_instructions getting_location)
+	?pnpdt_f1__ <-(dispatch_user_instructions getting_location)
 	?pnpdt_f2__ <-(task (plan user_speech) (id ?id) (action_type put_object_in_location) (params ?object ?location) (step ?step))
 	?pnpdt_f3__ <-(location_confirmed ?new_loc)
 	(not
@@ -408,8 +408,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-UOL-known_object
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-UOL-known_object
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -426,8 +426,8 @@
 	)
 )
 
-(defrule confirm_user_instructions-fail
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-fail
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -435,7 +435,7 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	?pnpdt_f1__ <-(confirm_user_instructions failed)
+	?pnpdt_f1__ <-(dispatch_user_instructions failed)
 	=>
 	(retract ?pnpdt_f1__)
 	(assert
@@ -443,9 +443,9 @@
 	)
 )
 
-(defrule confirm_user_instructions-failed-speech
+(defrule dispatch_user_instructions-failed-speech
 	(declare (salience -500))
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -455,17 +455,17 @@
 	)
 	(task (plan user_speech))
 	(not
-		(confirm_user_instructions failed)
+		(dispatch_user_instructions failed)
 	)
 	=>
 	(assert
-		(confirm_user_instructions failed)
+		(dispatch_user_instructions failed)
 		(task (plan ?pnpdt_planName__) (action_type spg_say) (params "Im sorry I cannot accomplish the request.") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
-(defrule confirm_user_instructions-success
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-success
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -486,8 +486,8 @@
 #      FINALIZING RULES
 ################################
 
-(defrule confirm_user_instructions-clear-confirmation_received
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-clear-confirmation_received
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
@@ -498,20 +498,20 @@
 	(retract ?pnpdt_f1__)
 )
 
-(defrule confirm_user_instructions-clear-task_flags
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-clear-task_flags
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)
 	)
 	(task_status ?pnpdt_task__ ?)
-	?pnpdt_f1__ <-(confirm_user_instructions $?)
+	?pnpdt_f1__ <-(dispatch_user_instructions $?)
 	=>
 	(retract ?pnpdt_f1__)
 )
 
-(defrule confirm_user_instructions-clear-user_tasks
-	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type confirm_user_instructions) (params "") (step $?pnpdt_steps__) )
+(defrule dispatch_user_instructions-clear-user_tasks
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type dispatch_user_instructions) (params "") (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
 	(not
 		(cancel_active_tasks)

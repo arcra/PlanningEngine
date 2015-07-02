@@ -11,4 +11,4 @@ wait_for_user_instruction.clp
 ../handover_object/handover_object.lst
 ../ask_for_confirmation/ask_for_confirmation.lst
 ../check_process_string/check_process_string.lst
-../confirm_user_instructions/confirm_user_instructions.lst
+../dispatch_user_instructions/dispatch_user_instructions.lst
