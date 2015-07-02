@@ -66,9 +66,10 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	?pnpdt_f1__ <-(BB_answer "ra_closegrip" ra_close 0 ?)
+	?pnpdt_f1__ <-(non-existent-fact)
+	?pnpdt_f2__ <-(BB_answer "ra_closegrip" ra_close 0 ?)
 	=>
-	(retract ?pnpdt_f1__)
+	(retract ?pnpdt_f1__ ?pnpdt_f2__)
 	(assert
 		(task (plan ?pnpdt_planName__) (action_type check_arm) (params right) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)

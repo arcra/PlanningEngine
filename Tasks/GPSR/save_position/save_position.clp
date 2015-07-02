@@ -101,12 +101,13 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	?pnpdt_f1__ <-(BB_answer "mp_position" ?symbol 0 ?)
+	?pnpdt_f1__ <-(non-existent-fact)
+	?pnpdt_f2__ <-(BB_answer "mp_position" ?symbol 0 ?)
 	(not
 		(save_position saved)
 	)
 	=>
-	(retract ?pnpdt_f1__)
+	(retract ?pnpdt_f1__ ?pnpdt_f2__)
 	(assert
 		(task (plan ?pnpdt_planName__) (action_type check_mp_position) (params "") (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)

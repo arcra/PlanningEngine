@@ -38,6 +38,51 @@
 	)
 )
 
+(defrule check_take_object-check_module-VISION
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type check_take_object) (params ?object) (step $?pnpdt_steps__) )
+	(active_task ?pnpdt_task__)
+	(not
+		(cancel_active_tasks)
+	)
+	(not
+		(task_status ?pnpdt_task__ ?)
+	)
+	(not
+		(checked module_is_connected VISION)
+	)
+	=>
+	(assert
+		(task (plan ?pnpdt_planName__) (action_type check_module_is_connected) (params VISION) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+	)
+)
+
+(defrule check_take_object-check_object_found
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type check_take_object) (params ?object) (step $?pnpdt_steps__) )
+	(active_task ?pnpdt_task__)
+	(not
+		(cancel_active_tasks)
+	)
+	(not
+		(task_status ?pnpdt_task__ ?)
+	)
+	(check_take_object module_is_connected VISION)
+	(check_take_object module_is_connected ST_PLN)
+	(not
+		(error object_not_found ?object)
+	)
+	(not
+		(checked object_is_reachable ?object)
+	)
+	(not
+		(check_take_object checked_object_found ?object)
+	)
+	=>
+	(assert
+		(check_take_object checked_object_found ?object)
+		(task (plan ?pnpdt_planName__) (action_type find_object) (params ?object) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+	)
+)
+
 (defrule check_take_object-check_object_reachable
 	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type check_take_object) (params ?object) (step $?pnpdt_steps__) )
 	(active_task ?pnpdt_task__)
@@ -47,7 +92,8 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	(check_take_object checked_find_object ?object)
+	?pnpdt_f1__ <-(non-existent-fact)
+	(check_take_object checked_object_found ?object)
 	(not
 		(error object_not_found ?object)
 	)
@@ -55,6 +101,7 @@
 		(checked object_is_reachable ?object)
 	)
 	=>
+	(retract ?pnpdt_f1__)
 	(assert
 		(task (plan ?pnpdt_planName__) (action_type check_object_is_reachable) (params ?object) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
@@ -87,12 +134,30 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	(module (name ST-PLN) (status disconnected))
-	?pnpdt_f1__ <-(checked module_is_connected ST-PLN)
+	(module (name ST_PLN) (status disconnected))
+	?pnpdt_f1__ <-(checked module_is_connected ST_PLN)
 	=>
 	(retract ?pnpdt_f1__)
 	(assert
-		(task (plan ?pnpdt_planName__) (action_type wait_user_start_module) (params ST-PLN) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(task (plan ?pnpdt_planName__) (action_type wait_user_start_module) (params ST_PLN) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+	)
+)
+
+(defrule check_take_object-module_disconnected-VISION
+	(task (id ?pnpdt_task__) (plan ?pnpdt_planName__) (action_type check_take_object) (params ?object) (step $?pnpdt_steps__) )
+	(active_task ?pnpdt_task__)
+	(not
+		(cancel_active_tasks)
+	)
+	(not
+		(task_status ?pnpdt_task__ ?)
+	)
+	(module (name VISION) (status disconnected))
+	?pnpdt_f1__ <-(checked module_is_connected VISION)
+	=>
+	(retract ?pnpdt_f1__)
+	(assert
+		(task (plan ?pnpdt_planName__) (action_type wait_user_start_module) (params VISION) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
@@ -152,10 +217,7 @@
 	?pnpdt_f3__ <-(checked module_is_connected VISION)
 	(module (name ST-PLN) (status connected))
 	(module (name ARMS) (status connected))
-	?pnpdt_f4__ <-(checked object_is_reachable ?object)
-	(not
-		(error object_not_reachable ?object)
-	)
+	?pnpdt_f4__ <-(check_take_object checked_object_found ?object)
 	(not
 		(error object_not_found ?object)
 	)
