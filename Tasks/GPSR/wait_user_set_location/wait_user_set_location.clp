@@ -50,10 +50,10 @@
 	)
 	=>
 	(assert
-		(wait_user_ser_location speech_sent)
-		(task (plan ?pnpdt_planName__) (action_type spg_say) (params (str-cat "Please set the location " ?loc_name " in the map so I can continue with the execution.")) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(wait_user_set_location speech_sent)
+		(task (plan ?pnpdt_planName__) (action_type spg_say) (params (str-cat "Please set the location called \"" ?loc_name "\" in the map so I can continue with the execution.")) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
-	(setTimer 10000 wait_user_set_location_speech)
+	(setTimer 15000 wait_user_set_location_speech)
 )
 
 (defrule wait_user_set_location-succeeded

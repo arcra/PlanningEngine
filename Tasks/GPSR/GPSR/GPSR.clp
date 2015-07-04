@@ -48,8 +48,8 @@
 	(not
 		(task_status ?pnpdt_task__ ?)
 	)
-	(robot_info (location gpsr_pos))
 	(BB_subscribed_to_var "recognizedSpeech")
+	(robot_info (location gpsr_pos))
 	(not
 		(GPSR executed)
 	)
