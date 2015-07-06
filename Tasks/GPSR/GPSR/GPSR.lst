@@ -1,4 +1,5 @@
 GPSR.clp
 ../subscribe_to_shared_var/subscribe_to_shared_var.lst
-../getclose_location/getclose_location.lst
+../enter_arena/enter_arena.lst
 ../wait_for_user_instruction/wait_for_user_instruction.lst
+../getclose_location/getclose_location.lst

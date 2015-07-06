@@ -35,7 +35,7 @@
 	)
 	=>
 	(assert
-		(task (plan ?pnpdt_planName__) (action_type getclose_location) (params gpsr_pos) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
+		(task (plan ?pnpdt_planName__) (action_type enter_arena) (params gpsr_pos) (step 1 $?pnpdt_steps__) (parent ?pnpdt_task__) )
 	)
 )
 
